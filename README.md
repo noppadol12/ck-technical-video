@@ -1,14 +1,14 @@
 # CK Technical Video
 
 ระบบวิดีโอเทคนิคสำหรับลูกค้า ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์
-Cloudflare Pages (หน้าเว็บ + API) · Supabase (ฐานข้อมูล) · Google Drive → Bunny Stream (วิดีโอ)
+Cloudflare Pages (หน้าเว็บ + API) · Supabase (ฐานข้อมูล) · Bunny Stream (วิดีโอ) · Google Drive (PDF)
 
 | เฟส | คู่มือ | สถานะ |
 | --- | --- | --- |
 | 1 ฐานข้อมูล + ย้ายข้อมูลจาก Sheet | [docs/PHASE1.md](docs/PHASE1.md) | เสร็จ |
 | 2 API + หน้าลูกค้า | [docs/PHASE2.md](docs/PHASE2.md) | เสร็จ |
 | 4 หลังบ้านแอดมิน (`/admin`) | [docs/PHASE4.md](docs/PHASE4.md) | เสร็จ |
-| 3 ย้ายวิดีโอไป Bunny Stream | — | รอ |
+| 3 ย้ายวิดีโอไป Bunny Stream | [docs/PHASE3.md](docs/PHASE3.md) | เสร็จ |
 
 ## โครงสร้าง
 
@@ -30,4 +30,5 @@ styles/            ต้นฉบับ Tailwind (build เป็น public/sty
 | `POST /api/logout` | ออกจากระบบ |
 | `GET /api/videos` | รายการวิดีโอที่เปิดแสดง |
 | `POST /api/videos/:id/play` | ลิงก์เล่นวิดีโอ + บันทึกการดู |
-| `/api/admin/*` | หลังบ้าน: login, me, customers, videos, categories, reports, actions |
+| `/api/admin/*` | หลังบ้าน: login, me, customers, videos (+ upload, migrate, sync), categories, reports, actions |
+| `POST /api/webhooks/bunny` | Bunny แจ้งสถานะแปลงไฟล์ (ระบบไปตรวจกับ Bunny API ซ้ำก่อนเชื่อ) |

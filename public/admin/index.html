@@ -113,6 +113,16 @@
 
       <!-- Videos -->
       <section data-panel="videos" class="hidden">
+        <div id="migratePanel" class="hidden bg-white rounded-2xl border border-slate-100 shadow-soft p-4 mb-4">
+          <div class="flex flex-col md:flex-row md:items-center gap-3">
+            <div class="flex-1">
+              <div class="font-semibold"><i class="fas fa-cloud-arrow-up mr-1.5 text-brand-600"></i>ย้ายวิดีโอจาก Google Drive ไป Bunny</div>
+              <div id="migrateStats" class="text-sm text-slate-500 mt-1"></div>
+              <div id="migrateProgress" class="text-sm text-brand-600 mt-1"></div>
+            </div>
+            <button data-action="migrate-all" id="migrateAllBtn" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press disabled:opacity-50"></button>
+          </div>
+        </div>
         <div class="flex flex-col sm:flex-row gap-3 mb-4">
           <div class="relative flex-1">
             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -192,6 +202,10 @@
     not_found: 'ไม่พบข้อมูล อาจถูกลบไปแล้ว',
     network: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้',
     server_error: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์',
+    bunny_not_configured: 'ยังไม่ได้ตั้งค่า Bunny ใน Cloudflare',
+    bunny_fetch_failed: 'สั่ง Bunny ดึงไฟล์ไม่สำเร็จ',
+    is_document: 'ไฟล์ PDF ย้ายไป Bunny ไม่ได้ (อยู่บน Drive ต่อ)',
+    already_on_bunny: 'วิดีโอนี้อยู่บน Bunny แล้ว',
   };
   const FIELD = { name: 'ชื่อ', code: 'รหัส', drive: 'ลิงก์ Google Drive', title: 'ชื่อวิดีโอ', expires_at: 'วันหมดอายุ', category_name: 'ชื่อหมวด' };
   function errorText(r) {
@@ -261,6 +275,8 @@
     setTimeout(() => $('modalBody').querySelector('input:not([type=hidden]):not([readonly]), select, textarea')?.focus(), 50);
   }
   function closeModal() {
+    if (state.uploading && !confirm('กำลังอัปโหลดอยู่ ยกเลิกการอัปโหลด?')) return;
+    if (state.uploading) { state.activeUpload?.abort(); state.uploading = false; }
     $('modal').classList.add('hidden');
     $('modal').classList.remove('flex');
     $('modalBody').innerHTML = '';
@@ -540,7 +556,7 @@
         </div>`}
         <div class="w-24 sm:w-32 aspect-video rounded-xl bg-slate-900 overflow-hidden shrink-0 relative">
           <i class="fas fa-film absolute inset-0 m-auto w-fit h-fit text-white/20 text-xl"></i>
-          ${v.thumbnail ? `<img src="${esc(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">` : ''}
+          ${v.thumbnail ? `<img src="${esc(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">` : ''}
         </div>
         <div class="flex-1 min-w-0">
           <div class="font-medium line-clamp-2 text-sm sm:text-base">${esc(v.title)}</div>
@@ -548,14 +564,132 @@
             <span><i class="fas fa-layer-group mr-1 text-slate-400"></i>${esc(v.category || 'ทั่วไป')}</span>
             <span><i class="fas fa-eye mr-1 text-slate-400"></i>${v.total_views} ครั้ง · ${v.unique_viewers} คน</span>
             ${v.is_published ? '' : '<span class="text-amber-600 font-medium"><i class="fas fa-eye-slash mr-1"></i>ซ่อนอยู่</span>'}
+            ${sourceBadge(v)}
           </div>
+          ${v.bunny_status === 'failed' && v.bunny_error ? `<div class="text-xs text-red-600 mt-1">${esc(v.bunny_error)}</div>` : ''}
         </div>
         <div class="flex flex-col sm:flex-row gap-1.5 shrink-0">
+          ${v.bunny_status === 'failed' && v.source === 'drive' && !v.is_document ? `<button data-action="video-migrate" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-brand-50 text-brand-600" title="ลองย้ายไป Bunny อีกครั้ง"><i class="fas fa-rotate-right"></i></button>` : ''}
           <button data-action="video-publish" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="${v.is_published ? 'ซ่อนจากลูกค้า' : 'แสดงให้ลูกค้า'}"><i class="fas ${v.is_published ? 'fa-eye' : 'fa-eye-slash'}"></i></button>
           <button data-action="video-edit" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="แก้ไข"><i class="fas fa-pen"></i></button>
           ${isOwner() ? `<button data-action="video-delete" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-red-50 text-red-500" title="ลบ"><i class="fas fa-trash"></i></button>` : ''}
         </div>
       </div>`).join('') : empty(state.videos.length ? 'ไม่พบวิดีโอที่ตรงกับเงื่อนไข' : 'ยังไม่มีวิดีโอ', 'fa-film');
+    renderMigratePanel();
+  }
+
+  // ---------------------------------------------------------------- bunny
+  function sourceBadge(v) {
+    if (v.status === 'processing') return '<span class="text-brand-600 font-medium"><i class="fas fa-spinner fa-spin mr-1"></i>กำลังแปลงไฟล์ (ยังไม่แสดงให้ลูกค้า)</span>';
+    if (v.status === 'failed') return '<span class="text-red-600 font-medium"><i class="fas fa-circle-exclamation mr-1"></i>อัปโหลดไม่สำเร็จ</span>';
+    if (v.source === 'bunny') return '<span class="text-emerald-700 font-medium"><i class="fas fa-shield-halved mr-1"></i>Bunny</span>';
+    if (v.bunny_status === 'fetching' || v.bunny_status === 'processing') return '<span class="text-brand-600 font-medium"><i class="fas fa-spinner fa-spin mr-1"></i>กำลังย้ายไป Bunny (ยังเล่นจาก Drive)</span>';
+    if (v.bunny_status === 'failed') return '<span class="text-red-600 font-medium"><i class="fab fa-google-drive mr-1"></i>Drive · ย้ายไม่สำเร็จ</span>';
+    if (v.is_document) return '<span class="text-slate-500"><i class="fas fa-file-pdf mr-1"></i>PDF บน Drive</span>';
+    return '<span class="text-slate-500"><i class="fab fa-google-drive mr-1"></i>Drive</span>';
+  }
+
+  const isPending = v => v.bunny_status === 'fetching' || v.bunny_status === 'processing';
+  const canMigrate = v => v.source === 'drive' && !v.is_document && v.drive_file_id && !isPending(v) && v.bunny_status !== 'ready';
+
+  function renderMigratePanel() {
+    const vs = state.videos;
+    const onBunny = vs.filter(v => v.source === 'bunny' && v.status === 'ready').length;
+    const pending = vs.filter(isPending).length;
+    const failed = vs.filter(v => v.source === 'drive' && v.bunny_status === 'failed').length;
+    const docs = vs.filter(v => v.source === 'drive' && v.is_document).length;
+    const todo = vs.filter(v => canMigrate(v) && v.bunny_status !== 'failed').length;
+    $('migratePanel').classList.toggle('hidden', !vs.some(v => v.source === 'drive') && !pending);
+    $('migrateStats').innerHTML = `บน Bunny <b>${onBunny}</b> · กำลังย้าย <b>${pending}</b> · รอย้าย <b>${todo}</b>` +
+      (failed ? ` · <span class="text-red-600">ไม่สำเร็จ <b>${failed}</b></span>` : '') +
+      (docs ? ` · PDF อยู่บน Drive <b>${docs}</b>` : '');
+    const btn = $('migrateAllBtn');
+    btn.textContent = todo ? `ย้ายที่เหลือ ${todo} เรื่อง` : (failed ? `ลองใหม่ ${failed} เรื่องที่ไม่สำเร็จ` : 'ย้ายครบแล้ว');
+    btn.disabled = state.migrating || (!todo && !failed);
+    btn.dataset.retry = todo ? '' : '1';
+    if (pending) startSync(); 
+  }
+
+  async function migrateAll() {
+    if (state.migrating) return;
+    const retry = $('migrateAllBtn').dataset.retry === '1';
+    const list = state.videos.filter(v => canMigrate(v) && (retry || v.bunny_status !== 'failed'));
+    if (!list.length) return;
+    if (!(await confirmBox('ย้ายวิดีโอไป Bunny', `สั่งให้ Bunny ดึง ${list.length} วิดีโอจาก Google Drive<br>ระหว่างย้าย ลูกค้ายังดูจาก Drive ได้ตามปกติ เรื่องไหนแปลงไฟล์เสร็จจะสลับไปเล่นจาก Bunny เอง<br><span class="text-xs text-slate-500">ไฟล์ PDF จะอยู่บน Drive ต่อ</span>`, 'เริ่มย้าย', false))) return;
+    state.migrating = true;
+    renderMigratePanel();
+    let ok = 0, bad = 0;
+    for (const [i, v] of list.entries()) {
+      $('migrateProgress').textContent = `กำลังสั่งย้าย ${i + 1}/${list.length}: ${v.title}`;
+      const r = await api(`/api/admin/videos/${v.id}/migrate`, { method: 'POST' });
+      if (r.ok) { ok++; v.bunny_status = 'fetching'; v.bunny_error = null; } else { bad++; }
+      renderVideos();
+    }
+    state.migrating = false;
+    $('migrateProgress').textContent = `สั่งย้ายแล้ว ${ok} เรื่อง${bad ? ` · สั่งไม่สำเร็จ ${bad}` : ''} · Bunny กำลังดึงไฟล์และแปลงไฟล์ (เรื่องละไม่กี่นาที) หน้านี้จะอัปเดตเอง`;
+    toast(`สั่งย้ายแล้ว ${ok} เรื่อง`, bad && !ok ? 'err' : 'ok');
+    renderMigratePanel();
+    startSync();
+  }
+
+  async function migrateOne(v) {
+    const r = await api(`/api/admin/videos/${v.id}/migrate`, { method: 'POST' });
+    if (!r.ok) return toast(errorText(r), 'err');
+    v.bunny_status = 'fetching'; v.bunny_error = null;
+    renderVideos(); startSync();
+    toast('สั่งย้ายใหม่แล้ว');
+  }
+
+  let syncTimer = null;
+  function startSync() {
+    if (syncTimer) return;
+    syncTimer = setInterval(async () => {
+      if (state.tab !== 'videos' || document.hidden) return;
+      const r = await api('/api/admin/videos/sync', { method: 'POST' });
+      if (!r.ok) return;
+      const before = state.videos.filter(isPending).length;
+      const rv = await api('/api/admin/videos');
+      if (!rv.ok) return;
+      state.videos = rv.data.videos;
+      renderVideos();
+      const after = state.videos.filter(isPending).length;
+      if (after < before) toast(`ย้ายเสร็จเพิ่ม ${before - after} เรื่อง`);
+      if (!after) { clearInterval(syncTimer); syncTimer = null; $('migrateProgress').textContent = ''; }
+    }, 10000);
+  }
+
+  let tusLoading = null;
+  function loadTus() {
+    if (window.tus) return Promise.resolve();
+    tusLoading ||= new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js';
+      sc.onload = resolve; sc.onerror = () => { tusLoading = null; reject(new Error('load')); };
+      document.head.appendChild(sc);
+    });
+    return tusLoading;
+  }
+
+  function uploadFile(file, creds, onProgress) {
+    return new Promise((resolve, reject) => {
+      const up = new window.tus.Upload(file, {
+        endpoint: creds.endpoint,
+        retryDelays: [0, 3000, 5000, 10000, 20000, 60000],
+        chunkSize: 50 * 1024 * 1024,
+        headers: {
+          AuthorizationSignature: creds.signature,
+          AuthorizationExpire: String(creds.expire),
+          VideoId: creds.videoId,
+          LibraryId: creds.libraryId,
+        },
+        metadata: { filetype: file.type || 'video/mp4', title: file.name },
+        onError: reject,
+        onProgress: (sent, total) => onProgress(sent / total),
+        onSuccess: resolve,
+      });
+      up.findPreviousUploads().then(prev => { if (prev.length) up.resumeFromPreviousUpload(prev[0]); up.start(); });
+      state.activeUpload = up;
+    });
   }
 
   function driveIdFrom(s) {
@@ -570,11 +704,24 @@
     const catOptions = '<option value="">ทั่วไป (ไม่มีหมวด)</option>' +
       state.categories.map(c => `<option value="${c.id}" ${v?.category_id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('') +
       '<option value="__new">+ สร้างหมวดใหม่...</option>';
+    const onBunny = v && v.source === 'bunny';
     openModal(isNew ? 'เพิ่มวิดีโอ' : 'แก้ไขวิดีโอ', `
       <form id="videoForm" novalidate>
-        ${field('ลิงก์ Google Drive <span class="text-red-500">*</span>', `<input name="drive" required class="${inputCls}" placeholder="https://drive.google.com/file/d/.../view" value="${v ? `https://drive.google.com/file/d/${esc(v.drive_file_id)}/view` : ''}">`,
-          'ไฟล์บน Drive ต้องแชร์แบบ "ทุกคนที่มีลิงก์ดูได้" จึงจะเล่นได้')}
-        <div id="drivePreview" class="hidden mb-4 aspect-video rounded-2xl bg-slate-900 overflow-hidden relative"></div>
+        ${isNew ? `
+        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl mb-4" role="radiogroup">
+          <button type="button" data-mode="upload" class="mode-btn py-2 rounded-lg text-sm font-medium"><i class="fas fa-upload mr-1.5"></i>อัปโหลดไฟล์</button>
+          <button type="button" data-mode="drive" class="mode-btn py-2 rounded-lg text-sm font-medium"><i class="fab fa-google-drive mr-1.5"></i>ลิงก์ Google Drive</button>
+        </div>
+        <div id="uploadWrap">
+          ${field('ไฟล์วิดีโอ <span class="text-red-500">*</span>', `<input name="file" type="file" accept="video/*" class="${inputCls} file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-900 file:text-white">`, 'อัปโหลดตรงไป Bunny · ไฟล์ใหญ่ได้ · เน็ตหลุดอัปต่อได้ · ห้ามปิดหน้านี้ระหว่างอัปโหลด')}
+          <div id="uploadBar" class="hidden mb-4"><div class="flex justify-between text-sm mb-1"><span>กำลังอัปโหลด</span><span id="uploadPct">0%</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div id="uploadFill" class="h-full bg-brand-600 rounded-full transition-all" style="width:0%"></div></div></div>
+        </div>` : ''}
+        <div id="driveWrap" class="${isNew || onBunny ? 'hidden' : ''}">
+          ${field('ลิงก์ Google Drive <span class="text-red-500">*</span>', `<input name="drive" class="${inputCls}" placeholder="https://drive.google.com/file/d/.../view" value="${v?.drive_file_id ? `https://drive.google.com/file/d/${esc(v.drive_file_id)}/view` : ''}">`,
+            'ไฟล์บน Drive ต้องแชร์แบบ "ทุกคนที่มีลิงก์ดูได้" จึงจะเล่นได้ · เหมาะกับ PDF')}
+          <div id="drivePreview" class="hidden mb-4 aspect-video rounded-2xl bg-slate-900 overflow-hidden relative"></div>
+        </div>
+        ${onBunny ? '<div class="mb-4 text-sm rounded-xl bg-emerald-50 text-emerald-700 px-4 py-3"><i class="fas fa-shield-halved mr-1.5"></i>ไฟล์อยู่บน Bunny (ลิงก์หมดอายุเอง ดาวน์โหลดไม่ได้)</div>' : ''}
         ${field('ชื่อวิดีโอ <span class="text-red-500">*</span>', `<input name="title" maxlength="200" required class="${inputCls}" value="${esc(v?.title)}">`)}
         ${field('หมวดหมู่', `<select name="category" class="${inputCls}">${catOptions}</select>`)}
         <div id="newCatWrap" class="hidden">${field('ชื่อหมวดใหม่', `<input name="category_name" maxlength="80" class="${inputCls}">`)}</div>
@@ -588,6 +735,21 @@
 
     const form = $('videoForm');
     const f = form.elements;
+    let mode = isNew ? 'upload' : (onBunny ? 'bunny' : 'drive');
+    const setMode = m => {
+      mode = m;
+      form.querySelectorAll('.mode-btn').forEach(b => b.className = `mode-btn py-2 rounded-lg text-sm font-medium ${b.dataset.mode === m ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`);
+      $('uploadWrap')?.classList.toggle('hidden', m !== 'upload');
+      $('driveWrap').classList.toggle('hidden', m !== 'drive');
+    };
+    if (isNew) {
+      form.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+      setMode('upload');
+      f.file.addEventListener('change', () => {
+        const file = f.file.files[0];
+        if (file && !f.namedItem('title').value.trim()) f.namedItem('title').value = file.name.replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ');
+      });
+    }
     const preview = () => {
       const id = driveIdFrom(f.drive.value);
       const box = $('drivePreview');
@@ -604,13 +766,41 @@
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      if (!driveIdFrom(f.drive.value)) { toast('ลิงก์ Google Drive ไม่ถูกต้อง', 'err'); f.drive.focus(); return; }
-      const body = { title: f.namedItem('title').value, drive: f.drive.value, description: f.description.value, is_published: f.is_published.checked };
+      if (state.uploading) return;
+      if (mode === 'drive' && !driveIdFrom(f.drive.value)) { toast('ลิงก์ Google Drive ไม่ถูกต้อง', 'err'); f.drive.focus(); return; }
+      if (mode === 'upload' && !f.file.files[0]) { toast('กรุณาเลือกไฟล์วิดีโอ', 'err'); return; }
+      if (!f.namedItem('title').value.trim()) { toast('กรุณากรอกชื่อวิดีโอ', 'err'); f.namedItem('title').focus(); return; }
+      const body = { title: f.namedItem('title').value, description: f.description.value, is_published: f.is_published.checked };
+      if (mode === 'drive') body.drive = f.drive.value;
       if (f.category.value === '__new') {
         if (!f.category_name.value.trim()) { toast('กรุณากรอกชื่อหมวดใหม่', 'err'); f.category_name.focus(); return; }
         body.category_name = f.category_name.value;
       } else body.category_id = f.category.value ? Number(f.category.value) : null;
       const btn = $('videoSave');
+      if (mode === 'upload') {
+        const file = f.file.files[0];
+        setBusy(btn, true, 'กำลังเตรียมอัปโหลด...');
+        try { await loadTus(); } catch (_) { setBusy(btn, false); return toast('โหลดตัวอัปโหลดไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่', 'err'); }
+        const r = await api('/api/admin/videos/upload', { method: 'POST', body });
+        if (!r.ok) { setBusy(btn, false); return toast(errorText(r), 'err'); }
+        state.uploading = true;
+        $('uploadBar').classList.remove('hidden');
+        setBusy(btn, true, 'กำลังอัปโหลด... ห้ามปิดหน้านี้');
+        try {
+          await uploadFile(file, r.data.tus, p => { const pct = Math.floor(p * 100); $('uploadPct').textContent = `${pct}%`; $('uploadFill').style.width = `${pct}%`; });
+          state.uploading = false;
+          closeModal();
+          toast('อัปโหลดเสร็จ Bunny กำลังแปลงไฟล์ จะแสดงให้ลูกค้าเองเมื่อพร้อม');
+        } catch (err) {
+          toast('อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง', 'err');
+          setBusy(btn, false);
+        } finally {
+          state.uploading = false;
+          state.activeUpload = null;
+        }
+        loadVideos();
+        return;
+      }
       setBusy(btn, true);
       const r = await api(isNew ? '/api/admin/videos' : `/api/admin/videos/${v.id}`, { method: isNew ? 'POST' : 'PATCH', body });
       setBusy(btn, false);
@@ -714,7 +904,7 @@
   // ---------------------------------------------------------------- reports
   const ACTION_TEXT = {
     'admin.login': 'เข้าสู่หลังบ้าน', 'customer.create': 'เพิ่มลูกค้า', 'customer.update': 'แก้ไขลูกค้า', 'customer.reset_sessions': 'เตะลูกค้าออกทุกเครื่อง',
-    'video.create': 'เพิ่มวิดีโอ', 'video.update': 'แก้ไขวิดีโอ', 'video.delete': 'ลบวิดีโอ', 'video.reorder': 'เรียงลำดับวิดีโอ',
+    'video.create': 'เพิ่มวิดีโอ', 'video.upload': 'อัปโหลดวิดีโอ', 'video.migrate': 'ย้ายวิดีโอไป Bunny', 'video.update': 'แก้ไขวิดีโอ', 'video.delete': 'ลบวิดีโอ', 'video.reorder': 'เรียงลำดับวิดีโอ',
     'category.create': 'เพิ่มหมวด', 'category.update': 'แก้ไขหมวด', 'category.delete': 'ลบหมวด', 'category.reorder': 'เรียงลำดับหมวด',
   };
 
@@ -772,6 +962,7 @@
   $('loginForm').addEventListener('submit', login);
   $('logoutBtn').addEventListener('click', logout);
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+  window.addEventListener('beforeunload', e => { if (state.uploading) { e.preventDefault(); e.returnValue = ''; } });
   window.addEventListener('hashchange', () => state.admin && switchTab(location.hash.slice(1)));
   $('customerSearch').addEventListener('input', debounce(renderCustomers, 150));
   $('customerStatus').addEventListener('change', renderCustomers);
@@ -806,6 +997,8 @@
       case 'video-edit': return videoForm(vid());
       case 'video-publish': return togglePublish(vid());
       case 'video-delete': return deleteVideo(vid());
+      case 'video-migrate': return migrateOne(vid());
+      case 'migrate-all': return migrateAll();
       case 'video-up': return moveVideo(id, -1);
       case 'video-down': return moveVideo(id, 1);
       case 'cat-rename': return renameCategory(cat());

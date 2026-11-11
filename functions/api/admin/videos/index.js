@@ -14,7 +14,7 @@ export async function onRequestGet({ env }) {
     d.select('video_stats?select=id,total_views,unique_viewers,last_viewed_at'),
   ]);
   const byId = new Map(stats.map(s => [s.id, s]));
-  return json({ videos: rows.map(v => shapeVideo(v, byId.get(v.id))) });
+  return json({ videos: rows.map(v => shapeVideo(v, byId.get(v.id), env)) });
 }
 
 export async function onRequestPost(context) {
@@ -41,5 +41,5 @@ export async function onRequestPost(context) {
   const created = await d.insertReturning('videos', row, 'id');
   const video = await d.one(`videos?id=eq.${q(created.id)}&select=${FIELDS}`);
   logAction(context, 'video.create', 'video', video.id, { title: video.title });
-  return json({ video: shapeVideo(video) }, 201);
+  return json({ video: shapeVideo(video, null, env) }, 201);
 }

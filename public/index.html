@@ -439,7 +439,7 @@
             <div class="absolute inset-0 flex items-center justify-center text-white/20">
               <i class="fas fa-film text-5xl"></i>
             </div>
-            ${v.thumbnail ? `<img src="${escapeHtml(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700 ease-out" onerror="this.remove()">` : ''}
+            ${v.thumbnail ? `<img src="${escapeHtml(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700 ease-out" onerror="this.remove()">` : ''}
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
               <div class="w-16 h-16 glass-play-btn rounded-full flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300 text-white pl-1 shadow-glass">

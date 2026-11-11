@@ -2,14 +2,12 @@ import { db } from '../../lib/supabase.js';
 import { currentCustomer } from '../../lib/auth.js';
 import { clearCookie } from '../../lib/session.js';
 import { json, fail } from '../../lib/http.js';
+import { bunnyThumbnail } from '../../lib/bunny.js';
 
 const DEFAULT_CATEGORY = 'ทั่วไป';
 
 function thumbnailOf(env, v) {
-  // เฟส 3: รูปปกจาก Bunny CDN (BUNNY_CDN_HOSTNAME เช่น vz-xxxx.b-cdn.net)
-  if (v.source === 'bunny') {
-    return env.BUNNY_CDN_HOSTNAME && v.bunny_video_id ? `https://${env.BUNNY_CDN_HOSTNAME}/${v.bunny_video_id}/thumbnail.jpg` : null;
-  }
+  if (v.source === 'bunny') return bunnyThumbnail(env, v.bunny_video_id);
   if (v.drive_file_id) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(v.drive_file_id)}&sz=w1000`;
   return null;
 }
