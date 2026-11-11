@@ -1,0 +1,23 @@
+{
+  "name": "ck-technical-video",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "migrate:check": "node scripts/migrate-sheet.mjs",
+    "migrate:commit": "node --env-file=.env scripts/migrate-sheet.mjs --commit",
+    "build:css": "tailwindcss -i ./styles/input.css -o ./public/styles.css --minify",
+    "dev": "npm run build:css && wrangler pages dev",
+    "deploy": "npm run build:css && wrangler pages deploy"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "csv-parse": "^5.5.6"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.19",
+    "wrangler": "^4.160.0"
+  }
+}

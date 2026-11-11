@@ -1,0 +1,4 @@
+# ใช้ตอนรันในเครื่องด้วย `npm run dev` เท่านั้น (คัดลอกเป็น .dev.vars)
+SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+SESSION_SECRET=สุ่มอย่างน้อย-32-ตัวอักษร

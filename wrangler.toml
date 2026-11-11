@@ -1,0 +1,3 @@
+name = "ck-technical-video"
+pages_build_output_dir = "public"
+compatibility_date = "2025-06-01"

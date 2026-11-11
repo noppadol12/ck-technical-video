@@ -1,0 +1,10 @@
+node_modules/
+.env
+.dev.vars
+.wrangler/
+.DS_Store
+
+# ข้อมูลลูกค้า ห้ามขึ้น GitHub
+data/*
+!data/.gitkeep
+migrate-data.sql
