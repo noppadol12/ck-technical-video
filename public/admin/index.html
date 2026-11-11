@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>หลังบ้าน · CK Technical Video</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; }
+    body.booting #loginView, body.booting #appView { visibility: hidden; }
+    .tab-btn[aria-selected="true"] { background: #0f172a; color: #fff; }
+    .modal-panel { max-height: calc(100vh - 2rem); }
+    @keyframes slideInDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    .toast-enter { animation: slideInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .btn-press:active { transform: scale(0.97); }
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity: .6; cursor: pointer; }
+  </style>
+</head>
+<body class="booting text-slate-800 antialiased min-h-screen">
+
+  <!-- Toast -->
+  <div id="toast" role="status" class="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] hidden items-center gap-3 px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-medium max-w-[92vw]">
+    <i id="toastIcon" class="fas"></i><span id="toastText"></span>
+  </div>
+
+  <!-- ========================= LOGIN ========================= -->
+  <div id="loginView" class="min-h-screen flex items-center justify-center px-4">
+    <form id="loginForm" class="bg-white w-full max-w-sm rounded-3xl shadow-soft border border-slate-100 p-8" novalidate>
+      <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-5">
+        <i class="fas fa-user-shield text-xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-center tracking-tight">หลังบ้าน CK Technical</h1>
+      <p class="text-sm text-slate-500 text-center mt-1 mb-8">สำหรับแอดมินเท่านั้น</p>
+      <label class="block text-sm font-medium mb-1.5" for="loginEmail">อีเมล</label>
+      <input id="loginEmail" type="email" autocomplete="username" required class="w-full mb-4 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
+      <label class="block text-sm font-medium mb-1.5" for="loginPassword">รหัสผ่าน</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" required class="w-full mb-6 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
+      <button id="loginBtn" type="submit" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium transition-colors btn-press">เข้าสู่ระบบ</button>
+    </form>
+  </div>
+
+  <!-- ========================= APP ========================= -->
+  <div id="appView" class="hidden min-h-screen flex-col">
+    <header class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="bg-gradient-to-tr from-brand-600 to-brand-400 text-white w-9 h-9 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-play text-sm ml-0.5"></i></div>
+          <div class="min-w-0">
+            <div class="font-bold tracking-tight leading-tight">CK Technical · หลังบ้าน</div>
+            <div class="text-xs text-slate-500 truncate"><span id="adminName"></span> · <span id="adminRole"></span></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-100"><i class="fas fa-up-right-from-square text-xs"></i> หน้าลูกค้า</a>
+          <button id="logoutBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-red-50 hover:text-red-600 btn-press"><i class="fas fa-sign-out-alt"></i><span class="hidden sm:inline">ออกจากระบบ</span></button>
+        </div>
+      </div>
+      <nav class="max-w-6xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto" role="tablist">
+        <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="dashboard"><i class="fas fa-chart-simple mr-1.5"></i>ภาพรวม</button>
+        <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="customers"><i class="fas fa-users mr-1.5"></i>ลูกค้า</button>
+        <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="videos"><i class="fas fa-film mr-1.5"></i>วิดีโอ</button>
+        <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="categories"><i class="fas fa-layer-group mr-1.5"></i>หมวดหมู่</button>
+        <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="reports"><i class="fas fa-file-lines mr-1.5"></i>รายงาน</button>
+      </nav>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1">
+
+      <!-- Dashboard -->
+      <section data-panel="dashboard" class="hidden space-y-6">
+        <div id="statCards" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-5">
+            <h2 class="font-semibold mb-4">วิดีโอยอดนิยม 30 วันล่าสุด</h2>
+            <div id="topVideos" class="space-y-3"></div>
+          </div>
+          <div class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-5">
+              <h2 class="font-semibold mb-1">รหัสใกล้หมดอายุ (30 วัน)</h2>
+              <p class="text-xs text-slate-500 mb-3">กดชื่อเพื่อแก้วันหมดอายุ</p>
+              <div id="expiringList" class="divide-y divide-slate-100"></div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-5">
+              <h2 class="font-semibold mb-1">ไม่ได้เข้าใช้งานเกิน 30 วัน</h2>
+              <p class="text-xs text-slate-500 mb-3">ลูกค้าที่รหัสยังใช้ได้แต่ไม่ได้เข้ามานาน</p>
+              <div id="inactiveList" class="divide-y divide-slate-100 max-h-80 overflow-y-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Customers -->
+      <section data-panel="customers" class="hidden">
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+          <div class="relative flex-1">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input id="customerSearch" type="search" placeholder="ค้นหารหัส ชื่อ เบอร์ บริษัท" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
+          </div>
+          <select id="customerStatus" class="px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium">
+            <option value="">ทุกสถานะ</option>
+            <option value="active">ใช้งานได้</option>
+            <option value="expired">หมดอายุ</option>
+            <option value="disabled">ปิดสิทธิ์</option>
+          </select>
+          <button data-action="customer-new" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มลูกค้า</button>
+        </div>
+        <p id="customerCount" class="text-sm text-slate-500 mb-3"></p>
+        <div id="customerList" class="space-y-3"></div>
+      </section>
+
+      <!-- Videos -->
+      <section data-panel="videos" class="hidden">
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+          <div class="relative flex-1">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input id="videoSearch" type="search" placeholder="ค้นหาชื่อวิดีโอ" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
+          </div>
+          <select id="videoCategory" class="px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium"></select>
+          <button data-action="video-new" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มวิดีโอ</button>
+        </div>
+        <p id="videoCount" class="text-sm text-slate-500 mb-3"></p>
+        <div id="videoList" class="space-y-3"></div>
+      </section>
+
+      <!-- Categories -->
+      <section data-panel="categories" class="hidden max-w-2xl">
+        <form id="categoryForm" class="flex gap-3 mb-4">
+          <input id="categoryName" maxlength="80" placeholder="ชื่อหมวดใหม่" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
+          <button class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มหมวด</button>
+        </form>
+        <p class="text-sm text-slate-500 mb-3">ลำดับที่นี่คือลำดับในตัวกรองหมวดหมู่ของหน้าลูกค้า</p>
+        <div id="categoryList" class="bg-white rounded-2xl border border-slate-100 shadow-soft divide-y divide-slate-100"></div>
+      </section>
+
+      <!-- Reports -->
+      <section data-panel="reports" class="hidden">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-4 mb-4">
+          <div class="flex flex-wrap gap-2 mb-4" role="radiogroup">
+            <button class="report-type px-4 py-2 rounded-xl text-sm font-medium" data-type="watch">การดูวิดีโอ</button>
+            <button class="report-type px-4 py-2 rounded-xl text-sm font-medium" data-type="login">การเข้าระบบ</button>
+            <button class="report-type px-4 py-2 rounded-xl text-sm font-medium" data-type="actions">ประวัติการแก้ไขของแอดมิน</button>
+          </div>
+          <form id="reportForm" class="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+            <label class="text-sm">ตั้งแต่<input id="reportFrom" type="date" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-slate-200"></label>
+            <label class="text-sm">ถึง<input id="reportTo" type="date" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-slate-200"></label>
+            <label class="text-sm col-span-2 md:col-span-1">ค้นหา<input id="reportQuery" type="search" placeholder="รหัส ชื่อ วิดีโอ" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-slate-200"></label>
+            <button class="py-2.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-search mr-1.5"></i>แสดง</button>
+            <a id="reportCsv" href="#" class="py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-center"><i class="fas fa-file-excel mr-1.5"></i>ดาวน์โหลด Excel</a>
+          </form>
+        </div>
+        <p id="reportCount" class="text-sm text-slate-500 mb-3"></p>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-soft overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead id="reportHead" class="bg-slate-50 text-slate-500 text-left"></thead>
+            <tbody id="reportBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ========================= MODAL ========================= -->
+  <div id="modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 sm:p-4" aria-modal="true" role="dialog">
+    <div class="modal-panel bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col">
+      <div class="flex items-center justify-between px-6 pt-5 pb-3">
+        <h3 id="modalTitle" class="text-lg font-bold tracking-tight"></h3>
+        <button data-action="modal-close" class="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-500" aria-label="ปิด"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="modalBody" class="px-6 pb-6 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <script>
+  'use strict';
+
+  // ---------------------------------------------------------------- utils
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const state = { admin: null, tab: 'dashboard', customers: [], videos: [], categories: [], reportType: 'watch' };
+
+  const ERR = {
+    invalid_login: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    too_many_attempts: 'ลองผิดหลายครั้ง กรุณารอ 15 นาที',
+    unauthorized: 'กรุณาเข้าสู่ระบบอีกครั้ง',
+    code_taken: 'รหัสนี้มีลูกค้าใช้แล้ว',
+    video_exists: 'วิดีโอไฟล์นี้มีในระบบแล้ว',
+    category_exists: 'มีหมวดชื่อนี้แล้ว',
+    owner_only: 'เฉพาะเจ้าของระบบ (owner) เท่านั้น',
+    not_found: 'ไม่พบข้อมูล อาจถูกลบไปแล้ว',
+    network: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้',
+    server_error: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์',
+  };
+  const FIELD = { name: 'ชื่อ', code: 'รหัส', drive: 'ลิงก์ Google Drive', title: 'ชื่อวิดีโอ', expires_at: 'วันหมดอายุ', category_name: 'ชื่อหมวด' };
+  function errorText(r) {
+    const e = r.data || {};
+    if (e.error === 'invalid_input') {
+      const f = FIELD[e.field] || e.field;
+      return e.reason === 'required' ? `กรุณากรอก${f}` : e.reason === 'too_long' ? `${f}ยาวเกินไป` : `${f}ไม่ถูกต้อง`;
+    }
+    return ERR[e.error] || ERR.server_error;
+  }
+
+  async function api(path, { method = 'GET', body } = {}) {
+    try {
+      const res = await fetch(path, {
+        method, credentials: 'same-origin',
+        headers: body ? { 'Content-Type': 'application/json' } : {},
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
+      if (res.status === 401 && path !== '/api/admin/login' && state.admin) { sessionExpired(); }
+      return { ok: res.ok, status: res.status, data };
+    } catch (_) {
+      return { ok: false, status: 0, data: { error: 'network' } };
+    }
+  }
+
+  let toastTimer;
+  function toast(msg, kind = 'ok') {
+    const t = $('toast');
+    t.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-medium max-w-[92vw] toast-enter ${kind === 'ok' ? 'bg-emerald-600' : 'bg-red-600'}`;
+    $('toastIcon').className = `fas ${kind === 'ok' ? 'fa-circle-check' : 'fa-circle-exclamation'}`;
+    $('toastText').textContent = msg;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.add('hidden'), 3500);
+  }
+
+  const TH_DATE = { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' };
+  const fmtDate = iso => (iso ? new Date(iso).toLocaleDateString('th-TH', TH_DATE) : '—');
+  const fmtDateTime = iso => (iso ? new Date(iso).toLocaleString('th-TH', { ...TH_DATE, hour: '2-digit', minute: '2-digit' }) : '—');
+  const toInputDate = iso => (iso ? new Date(new Date(iso).getTime() + 7 * 3600e3).toISOString().slice(0, 10) : '');
+  const plusYearInput = () => { const d = new Date(Date.now() + 7 * 3600e3); d.setUTCFullYear(d.getUTCFullYear() + 1); return d.toISOString().slice(0, 10); };
+  const daysAgoInput = n => new Date(Date.now() + 7 * 3600e3 - n * 864e5).toISOString().slice(0, 10);
+  const timeAgo = iso => {
+    if (!iso) return 'ยังไม่เคยเข้า';
+    const d = Math.floor((Date.now() - Date.parse(iso)) / 864e5);
+    return d <= 0 ? 'วันนี้' : d === 1 ? 'เมื่อวาน' : `${d} วันก่อน`;
+  };
+  const isOwner = () => state.admin?.role === 'owner';
+  const debounce = (fn, ms = 250) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+  const STATE_BADGE = {
+    active: '<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">ใช้งานได้</span>',
+    expired: '<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">หมดอายุ</span>',
+    disabled: '<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">ปิดสิทธิ์</span>',
+  };
+  const empty = (text, icon = 'fa-inbox') => `<div class="text-center text-slate-400 py-12"><i class="fas ${icon} text-3xl mb-3 opacity-60"></i><p>${esc(text)}</p></div>`;
+  const loading = () => '<div class="flex justify-center py-12"><div class="w-10 h-10 border-4 border-slate-200 border-t-brand-600 rounded-full animate-spin"></div></div>';
+
+  // ---------------------------------------------------------------- modal
+  function openModal(title, html) {
+    $('modalTitle').textContent = title;
+    $('modalBody').innerHTML = html;
+    $('modal').classList.remove('hidden');
+    $('modal').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => $('modalBody').querySelector('input:not([type=hidden]):not([readonly]), select, textarea')?.focus(), 50);
+  }
+  function closeModal() {
+    $('modal').classList.add('hidden');
+    $('modal').classList.remove('flex');
+    $('modalBody').innerHTML = '';
+    document.body.style.overflow = '';
+  }
+  function confirmBox(title, message, okText, danger = true) {
+    return new Promise(resolve => {
+      openModal(title, `
+        <p class="text-slate-600 mb-6">${message}</p>
+        <div class="flex gap-3">
+          <button data-c="no" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 font-medium">ยกเลิก</button>
+          <button data-c="yes" class="flex-1 py-3 rounded-xl ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-900 hover:bg-brand-600'} text-white font-medium">${esc(okText)}</button>
+        </div>`);
+      $('modalBody').querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => {
+        closeModal();
+        resolve(b.dataset.c === 'yes');
+      }));
+    });
+  }
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500';
+  const field = (label, inner, hint = '') => `<label class="block mb-4"><span class="block text-sm font-medium mb-1.5">${label}</span>${inner}${hint ? `<span class="block text-xs text-slate-500 mt-1.5">${hint}</span>` : ''}</label>`;
+  function setBusy(btn, busy, text) {
+    btn.disabled = busy;
+    btn.classList.toggle('opacity-70', busy);
+    if (busy) { btn.dataset.label = btn.innerHTML; btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i>${text || 'กำลังบันทึก...'}`; }
+    else if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+  }
+
+  // ---------------------------------------------------------------- auth
+  async function login(e) {
+    e.preventDefault();
+    const btn = $('loginBtn');
+    setBusy(btn, true, 'กำลังตรวจสอบ...');
+    const r = await api('/api/admin/login', { method: 'POST', body: { email: $('loginEmail').value, password: $('loginPassword').value } });
+    setBusy(btn, false);
+    if (!r.ok) { toast(errorText(r), 'err'); $('loginPassword').value = ''; $('loginPassword').focus(); return; }
+    $('loginPassword').value = '';
+    enterApp(r.data);
+  }
+
+  function enterApp(admin) {
+    state.admin = admin;
+    $('adminName').textContent = admin.name;
+    $('adminRole').textContent = admin.role === 'owner' ? 'เจ้าของระบบ' : 'ทีมงาน';
+    $('loginView').classList.add('hidden');
+    $('appView').classList.remove('hidden');
+    $('appView').classList.add('flex');
+    switchTab(location.hash.slice(1) || 'dashboard');
+  }
+
+  function sessionExpired() {
+    state.admin = null;
+    closeModal();
+    $('appView').classList.add('hidden');
+    $('appView').classList.remove('flex');
+    $('loginView').classList.remove('hidden');
+    toast(ERR.unauthorized, 'err');
+  }
+
+  async function logout() {
+    await api('/api/admin/logout', { method: 'POST' });
+    state.admin = null;
+    location.hash = '';
+    location.reload();
+  }
+
+  // ---------------------------------------------------------------- tabs
+  const LOADERS = { dashboard: loadDashboard, customers: loadCustomers, videos: loadVideos, categories: loadCategories, reports: loadReport };
+  function switchTab(tab) {
+    if (!LOADERS[tab]) tab = 'dashboard';
+    state.tab = tab;
+    if (location.hash.slice(1) !== tab) history.replaceState(null, '', `#${tab}`);
+    document.querySelectorAll('.tab-btn').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+    document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== tab));
+    LOADERS[tab]();
+  }
+
+  // ---------------------------------------------------------------- dashboard
+  async function loadDashboard() {
+    $('statCards').innerHTML = loading();
+    const r = await api('/api/admin/reports/summary');
+    if (!r.ok) { $('statCards').innerHTML = empty(errorText(r), 'fa-triangle-exclamation'); return; }
+    const s = r.data;
+    const card = (icon, color, value, label, sub = '') => `
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-5">
+        <div class="w-10 h-10 rounded-xl ${color} flex items-center justify-center mb-3"><i class="fas ${icon}"></i></div>
+        <div class="text-3xl font-bold tracking-tight">${Number(value).toLocaleString('th-TH')}</div>
+        <div class="text-sm text-slate-500 mt-1">${label}</div>
+        ${sub ? `<div class="text-xs text-slate-400 mt-1">${sub}</div>` : ''}
+      </div>`;
+    $('statCards').innerHTML =
+      card('fa-users', 'bg-emerald-50 text-emerald-600', s.customers.active, 'ลูกค้าที่ใช้งานได้', `หมดอายุ ${s.customers.expired} · ปิดสิทธิ์ ${s.customers.disabled}`) +
+      card('fa-right-to-bracket', 'bg-blue-50 text-blue-600', s.logins_7d, 'เข้าระบบ 7 วันล่าสุด') +
+      card('fa-play', 'bg-purple-50 text-purple-600', s.views_7d, 'ดูวิดีโอ 7 วันล่าสุด', `30 วัน: ${s.views_30d}`) +
+      card('fa-film', 'bg-amber-50 text-amber-600', s.videos.published, 'วิดีโอที่แสดงอยู่', `ทั้งหมด ${s.videos.total}`);
+
+    const max = Math.max(1, ...s.top_videos_30d.map(t => t.views));
+    $('topVideos').innerHTML = s.top_videos_30d.length ? s.top_videos_30d.map((t, i) => `
+      <div>
+        <div class="flex justify-between gap-3 text-sm mb-1"><span class="truncate"><span class="text-slate-400 mr-1.5">${i + 1}.</span>${esc(t.title)}</span><span class="shrink-0 font-semibold">${t.views} <span class="font-normal text-slate-400">ครั้ง · ${t.viewers} คน</span></span></div>
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-brand-500 rounded-full" style="width:${(t.views / max) * 100}%"></div></div>
+      </div>`).join('') : empty('ยังไม่มีการดูใน 30 วันที่ผ่านมา', 'fa-chart-simple');
+
+    const row = (c, right) => `<button data-action="customer-edit" data-id="${esc(c.id)}" class="w-full flex justify-between gap-3 py-2.5 text-left hover:bg-slate-50 px-2 -mx-2 rounded-lg"><span class="min-w-0"><span class="block font-medium truncate">${esc(c.name)}</span><span class="block text-xs text-slate-500 font-mono">${esc(c.code)}</span></span><span class="text-sm text-slate-500 shrink-0">${right}</span></button>`;
+    $('expiringList').innerHTML = s.expiring_soon.length ? s.expiring_soon.map(c => row(c, fmtDate(c.expires_at))).join('') : '<p class="text-sm text-slate-400 py-2">ไม่มี</p>';
+    $('inactiveList').innerHTML = s.inactive_30d.length ? s.inactive_30d.map(c => row(c, timeAgo(c.last_login_at))).join('') : '<p class="text-sm text-slate-400 py-2">ไม่มี</p>';
+    if (!state.customers.length) api('/api/admin/customers').then(r2 => { if (r2.ok) state.customers = r2.data.customers; });
+  }
+
+  // ---------------------------------------------------------------- customers
+  async function loadCustomers() {
+    $('customerList').innerHTML = loading();
+    const r = await api('/api/admin/customers');
+    if (!r.ok) { $('customerList').innerHTML = empty(errorText(r), 'fa-triangle-exclamation'); return; }
+    state.customers = r.data.customers;
+    renderCustomers();
+  }
+
+  function renderCustomers() {
+    const term = $('customerSearch').value.trim().toLowerCase();
+    const st = $('customerStatus').value;
+    const list = state.customers.filter(c =>
+      (!st || c.state === st) &&
+      (!term || [c.code, c.name, c.phone, c.company].some(v => String(v || '').toLowerCase().includes(term))));
+    $('customerCount').textContent = `${list.length} จาก ${state.customers.length} ราย`;
+    $('customerList').innerHTML = list.length ? list.map(c => `
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-4 flex flex-col md:flex-row md:items-center gap-3">
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <span class="font-semibold">${esc(c.name)}</span>${STATE_BADGE[c.state]}
+          </div>
+          <div class="text-sm text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
+            <span class="font-mono text-slate-700">${esc(c.code)}</span>
+            ${c.company ? `<span><i class="fas fa-building mr-1 text-slate-400"></i>${esc(c.company)}</span>` : ''}
+            ${c.phone ? `<span><i class="fas fa-phone mr-1 text-slate-400"></i>${esc(c.phone)}</span>` : ''}
+          </div>
+          <div class="text-xs text-slate-400 mt-1.5 flex flex-wrap gap-x-4">
+            <span>หมดอายุ ${c.expires_at ? fmtDate(c.expires_at) : 'ไม่มีกำหนด'}</span>
+            <span>เข้าล่าสุด ${timeAgo(c.last_login_at)}</span>
+            <span>ดูวิดีโอ ${c.total_views} ครั้ง</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0">
+          <button data-action="customer-copy" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-[#00B900]/10 text-[#00A000] hover:bg-[#00B900]/20 font-medium" title="คัดลอกข้อความส่ง LINE"><i class="fab fa-line mr-1"></i>คัดลอก</button>
+          <button data-action="customer-edit" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200 font-medium"><i class="fas fa-pen mr-1"></i>แก้ไข</button>
+          <button data-action="customer-toggle" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm font-medium ${c.active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}">${c.active ? '<i class="fas fa-ban mr-1"></i>ปิดสิทธิ์' : '<i class="fas fa-check mr-1"></i>เปิดสิทธิ์'}</button>
+        </div>
+      </div>`).join('') : empty(state.customers.length ? 'ไม่พบลูกค้าที่ตรงกับเงื่อนไข' : 'ยังไม่มีลูกค้า', 'fa-users');
+  }
+
+  function lineMessage(c) {
+    return [
+      'รหัสเข้าชมวิดีโอเทคนิค CK Aircond',
+      `ชื่อ: ${c.name}`,
+      `รหัส: ${c.code}`,
+      `เข้าชมได้ที่: ${location.origin}`,
+      `ใช้ได้ถึง: ${c.expires_at ? fmtDate(c.expires_at) : 'ไม่มีกำหนด'}`,
+    ].join('\n');
+  }
+
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; }
+    catch (_) {
+      const ta = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy'); ta.remove(); return ok;
+    }
+  }
+
+  function customerForm(c) {
+    const isNew = !c;
+    openModal(isNew ? 'เพิ่มลูกค้าใหม่' : 'แก้ไขลูกค้า', `
+      <form id="customerForm" novalidate>
+        ${field('ชื่อลูกค้า / ร้าน / บริษัท <span class="text-red-500">*</span>', `<input name="name" maxlength="120" required class="${inputCls}" value="${esc(c?.name)}">`)}
+        <div class="grid grid-cols-2 gap-3">
+          ${field('เบอร์โทร', `<input name="phone" maxlength="40" inputmode="tel" class="${inputCls}" value="${esc(c?.phone)}">`)}
+          ${field('บริษัท', `<input name="company" maxlength="160" class="${inputCls}" value="${esc(c?.company)}">`)}
+        </div>
+        ${field('รหัสเข้าชม', `<input name="code" maxlength="64" autocapitalize="characters" spellcheck="false" class="${inputCls} font-mono uppercase" value="${esc(c?.code)}" placeholder="${isNew ? 'เว้นว่างให้ระบบสร้างให้' : ''}">`,
+          isNew ? 'เว้นว่าง: ใช้ CK-เบอร์โทร ถ้ามีเบอร์ ไม่งั้นสุ่ม 6 หลัก · ใช้ได้ A-Z 0-9 - _ .' : 'เปลี่ยนรหัสแล้ว ลูกค้าต้องใช้รหัสใหม่ในการล็อกอินครั้งต่อไป')}
+        ${field('ใช้ได้ถึงวันที่', `<input name="expires_at" type="date" class="${inputCls}" value="${isNew ? plusYearInput() : toInputDate(c.expires_at)}">`, 'เว้นว่าง = ไม่มีวันหมดอายุ')}
+        ${field('หมายเหตุ', `<textarea name="note" rows="2" maxlength="1000" class="${inputCls}">${esc(c?.note)}</textarea>`)}
+        ${isNew ? '' : `
+          <div class="rounded-2xl bg-slate-50 p-4 mb-4 text-sm">
+            <div class="flex items-center justify-between gap-3">
+              <span>สถานะ: ${STATE_BADGE[c.state]}</span>
+              <button type="button" data-action="customer-reset" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 font-medium"><i class="fas fa-right-from-bracket mr-1"></i>เตะออกจากทุกเครื่อง</button>
+            </div>
+            <div class="text-xs text-slate-500 mt-2">สร้างเมื่อ ${fmtDate(c.created_at)} · เข้าล่าสุด ${timeAgo(c.last_login_at)}</div>
+          </div>`}
+        <button id="customerSave" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press">${isNew ? 'เพิ่มลูกค้า' : 'บันทึก'}</button>
+      </form>`);
+
+    $('customerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = e.target.elements;
+      const body = {
+        name: f.namedItem('name').value, phone: f.phone.value, company: f.company.value, note: f.note.value,
+        expires_at: f.expires_at.value || null,
+      };
+      const code = f.code.value.trim().toUpperCase();
+      if (isNew ? code : code !== c.code) body.code = code;
+      const btn = $('customerSave');
+      setBusy(btn, true);
+      const r = await api(isNew ? '/api/admin/customers' : `/api/admin/customers/${c.id}`, { method: isNew ? 'POST' : 'PATCH', body });
+      setBusy(btn, false);
+      if (!r.ok) return toast(errorText(r), 'err');
+      const saved = { last_login_at: c?.last_login_at ?? null, total_views: c?.total_views ?? 0, ...r.data.customer };
+      const i = state.customers.findIndex(x => x.id === saved.id);
+      if (i >= 0) state.customers[i] = saved; else state.customers.unshift(saved);
+      if (state.tab === 'customers') renderCustomers(); else if (state.tab === 'dashboard') loadDashboard();
+      if (isNew) showCreated(saved); else { closeModal(); toast('บันทึกแล้ว'); }
+    });
+  }
+
+  function showCreated(c) {
+    const msg = lineMessage(c);
+    openModal('เพิ่มลูกค้าแล้ว', `
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3"><i class="fas fa-check text-2xl"></i></div>
+        <p class="text-slate-500 text-sm">รหัสเข้าชมของ ${esc(c.name)}</p>
+        <p class="font-mono text-2xl font-bold tracking-wide mt-1">${esc(c.code)}</p>
+      </div>
+      <pre class="bg-slate-50 rounded-2xl p-4 text-sm whitespace-pre-wrap font-sans mb-4">${esc(msg)}</pre>
+      <button data-action="copy-created" class="w-full py-3.5 rounded-xl bg-[#00B900] hover:bg-[#00A000] text-white font-medium btn-press"><i class="fab fa-line mr-2"></i>คัดลอกข้อความไปส่ง LINE</button>`);
+    $('modalBody').querySelector('[data-action="copy-created"]').addEventListener('click', async () => {
+      if (await copyText(msg)) toast('คัดลอกแล้ว วางในแชต LINE ได้เลย'); else toast('คัดลอกไม่สำเร็จ', 'err');
+    });
+  }
+
+  async function toggleCustomer(c) {
+    const turnOff = c.active;
+    if (turnOff && !(await confirmBox('ปิดสิทธิ์ลูกค้า', `ปิดสิทธิ์ <b>${esc(c.name)}</b> (${esc(c.code)})?<br>ลูกค้าจะถูกออกจากระบบทันทีและเข้าใหม่ไม่ได้ เปิดคืนได้ภายหลัง`, 'ปิดสิทธิ์'))) return;
+    const r = await api(`/api/admin/customers/${c.id}`, { method: 'PATCH', body: { active: !c.active } });
+    if (!r.ok) return toast(errorText(r), 'err');
+    Object.assign(c, r.data.customer);
+    renderCustomers();
+    toast(turnOff ? 'ปิดสิทธิ์แล้ว' : 'เปิดสิทธิ์แล้ว');
+  }
+
+  async function resetCustomer(id) {
+    const c = state.customers.find(x => x.id === id);
+    if (!(await confirmBox('เตะออกจากทุกเครื่อง', `${esc(c?.name || '')} ต้องใส่รหัสใหม่ในทุกเครื่องที่เคยล็อกอินไว้ รหัสเดิมยังใช้ได้`, 'ยืนยัน'))) return;
+    const r = await api(`/api/admin/customers/${id}/reset-sessions`, { method: 'POST' });
+    toast(r.ok ? 'ออกจากระบบทุกเครื่องแล้ว' : errorText(r), r.ok ? 'ok' : 'err');
+  }
+
+  // ---------------------------------------------------------------- videos
+  async function loadVideos() {
+    $('videoList').innerHTML = loading();
+    const [rv, rc] = await Promise.all([api('/api/admin/videos'), api('/api/admin/categories')]);
+    if (!rv.ok) { $('videoList').innerHTML = empty(errorText(rv), 'fa-triangle-exclamation'); return; }
+    state.videos = rv.data.videos;
+    if (rc.ok) state.categories = rc.data.categories;
+    const sel = $('videoCategory');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">ทุกหมวดหมู่</option><option value="none">ไม่มีหมวด (ทั่วไป)</option>' +
+      state.categories.map(c => `<option value="${c.id}">${esc(c.name)} (${c.video_count})</option>`).join('');
+    sel.value = [...sel.options].some(o => o.value === cur) ? cur : '';
+    renderVideos();
+  }
+
+  function renderVideos() {
+    const term = $('videoSearch').value.trim().toLowerCase();
+    const cat = $('videoCategory').value;
+    const filtered = !!(term || cat);
+    const list = state.videos.filter(v =>
+      (!term || v.title.toLowerCase().includes(term)) &&
+      (!cat || (cat === 'none' ? v.category_id == null : String(v.category_id) === cat)));
+    $('videoCount').textContent = `${list.length} จาก ${state.videos.length} เรื่อง · แสดงอยู่ ${state.videos.filter(v => v.is_published).length}` + (filtered ? ' · ล้างตัวกรองเพื่อเลื่อนลำดับ' : '');
+    $('videoList').innerHTML = list.length ? list.map(v => `
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-3 flex items-center gap-3 ${v.is_published ? '' : 'opacity-60'}">
+        ${filtered ? '' : `
+        <div class="flex flex-col shrink-0">
+          <button data-action="video-up" data-id="${esc(v.id)}" class="w-8 h-7 rounded-lg hover:bg-slate-100 text-slate-400" aria-label="เลื่อนขึ้น"><i class="fas fa-chevron-up text-xs"></i></button>
+          <button data-action="video-down" data-id="${esc(v.id)}" class="w-8 h-7 rounded-lg hover:bg-slate-100 text-slate-400" aria-label="เลื่อนลง"><i class="fas fa-chevron-down text-xs"></i></button>
+        </div>`}
+        <div class="w-24 sm:w-32 aspect-video rounded-xl bg-slate-900 overflow-hidden shrink-0 relative">
+          <i class="fas fa-film absolute inset-0 m-auto w-fit h-fit text-white/20 text-xl"></i>
+          ${v.thumbnail ? `<img src="${esc(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">` : ''}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-medium line-clamp-2 text-sm sm:text-base">${esc(v.title)}</div>
+          <div class="text-xs text-slate-500 mt-1 flex flex-wrap gap-x-3">
+            <span><i class="fas fa-layer-group mr-1 text-slate-400"></i>${esc(v.category || 'ทั่วไป')}</span>
+            <span><i class="fas fa-eye mr-1 text-slate-400"></i>${v.total_views} ครั้ง · ${v.unique_viewers} คน</span>
+            ${v.is_published ? '' : '<span class="text-amber-600 font-medium"><i class="fas fa-eye-slash mr-1"></i>ซ่อนอยู่</span>'}
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-1.5 shrink-0">
+          <button data-action="video-publish" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="${v.is_published ? 'ซ่อนจากลูกค้า' : 'แสดงให้ลูกค้า'}"><i class="fas ${v.is_published ? 'fa-eye' : 'fa-eye-slash'}"></i></button>
+          <button data-action="video-edit" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="แก้ไข"><i class="fas fa-pen"></i></button>
+          ${isOwner() ? `<button data-action="video-delete" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-red-50 text-red-500" title="ลบ"><i class="fas fa-trash"></i></button>` : ''}
+        </div>
+      </div>`).join('') : empty(state.videos.length ? 'ไม่พบวิดีโอที่ตรงกับเงื่อนไข' : 'ยังไม่มีวิดีโอ', 'fa-film');
+  }
+
+  function driveIdFrom(s) {
+    s = String(s || '').trim();
+    if (/^[a-zA-Z0-9_-]{20,}$/.test(s)) return s;
+    const m = s.match(/\/d\/([a-zA-Z0-9_-]{20,})/) || s.match(/[?&]id=([a-zA-Z0-9_-]{20,})/) || s.match(/[-\w]{25,}/);
+    return m ? (m[1] || m[0]) : null;
+  }
+
+  function videoForm(v) {
+    const isNew = !v;
+    const catOptions = '<option value="">ทั่วไป (ไม่มีหมวด)</option>' +
+      state.categories.map(c => `<option value="${c.id}" ${v?.category_id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('') +
+      '<option value="__new">+ สร้างหมวดใหม่...</option>';
+    openModal(isNew ? 'เพิ่มวิดีโอ' : 'แก้ไขวิดีโอ', `
+      <form id="videoForm" novalidate>
+        ${field('ลิงก์ Google Drive <span class="text-red-500">*</span>', `<input name="drive" required class="${inputCls}" placeholder="https://drive.google.com/file/d/.../view" value="${v ? `https://drive.google.com/file/d/${esc(v.drive_file_id)}/view` : ''}">`,
+          'ไฟล์บน Drive ต้องแชร์แบบ "ทุกคนที่มีลิงก์ดูได้" จึงจะเล่นได้')}
+        <div id="drivePreview" class="hidden mb-4 aspect-video rounded-2xl bg-slate-900 overflow-hidden relative"></div>
+        ${field('ชื่อวิดีโอ <span class="text-red-500">*</span>', `<input name="title" maxlength="200" required class="${inputCls}" value="${esc(v?.title)}">`)}
+        ${field('หมวดหมู่', `<select name="category" class="${inputCls}">${catOptions}</select>`)}
+        <div id="newCatWrap" class="hidden">${field('ชื่อหมวดใหม่', `<input name="category_name" maxlength="80" class="${inputCls}">`)}</div>
+        ${field('คำอธิบาย (ไม่บังคับ)', `<textarea name="description" rows="2" maxlength="2000" class="${inputCls}">${esc(v?.description)}</textarea>`)}
+        <label class="flex items-center gap-3 mb-6 cursor-pointer select-none">
+          <input name="is_published" type="checkbox" class="w-5 h-5 accent-blue-600" ${!v || v.is_published ? 'checked' : ''}>
+          <span class="text-sm font-medium">แสดงให้ลูกค้าเห็น</span>
+        </label>
+        <button id="videoSave" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press">${isNew ? 'เพิ่มวิดีโอ' : 'บันทึก'}</button>
+      </form>`);
+
+    const form = $('videoForm');
+    const f = form.elements;
+    const preview = () => {
+      const id = driveIdFrom(f.drive.value);
+      const box = $('drivePreview');
+      if (!id) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      box.innerHTML = `<i class="fas fa-film absolute inset-0 m-auto w-fit h-fit text-white/20 text-3xl"></i><img src="https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w800" alt="" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">`;
+    };
+    f.drive.addEventListener('input', debounce(preview, 300));
+    preview();
+    f.category.addEventListener('change', () => {
+      $('newCatWrap').classList.toggle('hidden', f.category.value !== '__new');
+      if (f.category.value === '__new') f.category_name.focus();
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!driveIdFrom(f.drive.value)) { toast('ลิงก์ Google Drive ไม่ถูกต้อง', 'err'); f.drive.focus(); return; }
+      const body = { title: f.namedItem('title').value, drive: f.drive.value, description: f.description.value, is_published: f.is_published.checked };
+      if (f.category.value === '__new') {
+        if (!f.category_name.value.trim()) { toast('กรุณากรอกชื่อหมวดใหม่', 'err'); f.category_name.focus(); return; }
+        body.category_name = f.category_name.value;
+      } else body.category_id = f.category.value ? Number(f.category.value) : null;
+      const btn = $('videoSave');
+      setBusy(btn, true);
+      const r = await api(isNew ? '/api/admin/videos' : `/api/admin/videos/${v.id}`, { method: isNew ? 'POST' : 'PATCH', body });
+      setBusy(btn, false);
+      if (!r.ok) return toast(errorText(r), 'err');
+      closeModal();
+      toast(isNew ? 'เพิ่มวิดีโอแล้ว' : 'บันทึกแล้ว');
+      loadVideos();
+    });
+  }
+
+  async function togglePublish(v) {
+    const r = await api(`/api/admin/videos/${v.id}`, { method: 'PATCH', body: { is_published: !v.is_published } });
+    if (!r.ok) return toast(errorText(r), 'err');
+    v.is_published = r.data.video.is_published;
+    renderVideos();
+    toast(v.is_published ? 'แสดงให้ลูกค้าแล้ว' : 'ซ่อนจากลูกค้าแล้ว');
+  }
+
+  async function deleteVideo(v) {
+    if (!(await confirmBox('ลบวิดีโอถาวร', `ลบ <b>${esc(v.title)}</b>?<br>ลบแล้วกู้คืนไม่ได้ (ไฟล์บน Google Drive ไม่ถูกลบ) ถ้าแค่ไม่อยากให้ลูกค้าเห็น ให้ใช้ปุ่มซ่อนแทน`, 'ลบถาวร'))) return;
+    const r = await api(`/api/admin/videos/${v.id}`, { method: 'DELETE' });
+    if (!r.ok) return toast(errorText(r), 'err');
+    state.videos = state.videos.filter(x => x.id !== v.id);
+    renderVideos();
+    toast('ลบแล้ว');
+  }
+
+  async function moveVideo(id, dir) {
+    const i = state.videos.findIndex(v => v.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= state.videos.length) return;
+    [state.videos[i], state.videos[j]] = [state.videos[j], state.videos[i]];
+    renderVideos();
+    const r = await api('/api/admin/videos/reorder', { method: 'POST', body: { ids: state.videos.map(v => v.id) } });
+    if (!r.ok) { toast(errorText(r), 'err'); loadVideos(); }
+  }
+
+  // ---------------------------------------------------------------- categories
+  async function loadCategories() {
+    $('categoryList').innerHTML = loading();
+    const r = await api('/api/admin/categories');
+    if (!r.ok) { $('categoryList').innerHTML = empty(errorText(r), 'fa-triangle-exclamation'); return; }
+    state.categories = r.data.categories;
+    renderCategories(r.data.uncategorized);
+  }
+
+  function renderCategories(uncategorized = 0) {
+    $('categoryList').innerHTML = (state.categories.length ? state.categories.map(c => `
+      <div class="flex items-center gap-3 p-3">
+        <div class="flex flex-col">
+          <button data-action="cat-up" data-id="${c.id}" class="w-8 h-6 rounded-lg hover:bg-slate-100 text-slate-400" aria-label="เลื่อนขึ้น"><i class="fas fa-chevron-up text-xs"></i></button>
+          <button data-action="cat-down" data-id="${c.id}" class="w-8 h-6 rounded-lg hover:bg-slate-100 text-slate-400" aria-label="เลื่อนลง"><i class="fas fa-chevron-down text-xs"></i></button>
+        </div>
+        <div class="flex-1 min-w-0"><div class="font-medium truncate">${esc(c.name)}</div><div class="text-xs text-slate-500">${c.video_count} วิดีโอ</div></div>
+        <button data-action="cat-rename" data-id="${c.id}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="เปลี่ยนชื่อ"><i class="fas fa-pen"></i></button>
+        ${isOwner() ? `<button data-action="cat-delete" data-id="${c.id}" class="w-9 h-9 rounded-xl hover:bg-red-50 text-red-500" title="ลบ"><i class="fas fa-trash"></i></button>` : ''}
+      </div>`).join('') : empty('ยังไม่มีหมวด', 'fa-layer-group')) +
+      (uncategorized ? `<div class="p-3 pl-14 text-sm text-slate-500">ทั่วไป (ไม่มีหมวด) · ${uncategorized} วิดีโอ</div>` : '');
+  }
+
+  async function addCategory(e) {
+    e.preventDefault();
+    const name = $('categoryName').value.trim();
+    if (!name) return $('categoryName').focus();
+    const r = await api('/api/admin/categories', { method: 'POST', body: { name } });
+    if (!r.ok) return toast(errorText(r), 'err');
+    $('categoryName').value = '';
+    toast('เพิ่มหมวดแล้ว');
+    loadCategories();
+  }
+
+  function renameCategory(c) {
+    openModal('เปลี่ยนชื่อหมวด', `
+      <form id="catForm">${field('ชื่อหมวด', `<input name="name" maxlength="80" required class="${inputCls}" value="${esc(c.name)}">`)}
+      <button id="catSave" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium">บันทึก</button></form>`);
+    $('catForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const r = await api(`/api/admin/categories/${c.id}`, { method: 'PATCH', body: { name: e.target.elements.namedItem('name').value } });
+      if (!r.ok) return toast(errorText(r), 'err');
+      closeModal(); toast('บันทึกแล้ว'); loadCategories();
+    });
+  }
+
+  async function deleteCategory(c) {
+    if (!(await confirmBox('ลบหมวด', `ลบหมวด <b>${esc(c.name)}</b>?<br>วิดีโอ ${c.video_count} เรื่องในหมวดนี้จะไม่ถูกลบ แต่จะย้ายไปอยู่ "ทั่วไป"`, 'ลบหมวด'))) return;
+    const r = await api(`/api/admin/categories/${c.id}`, { method: 'DELETE' });
+    if (!r.ok) return toast(errorText(r), 'err');
+    toast('ลบหมวดแล้ว'); loadCategories();
+  }
+
+  async function moveCategory(id, dir) {
+    const i = state.categories.findIndex(c => c.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= state.categories.length) return;
+    [state.categories[i], state.categories[j]] = [state.categories[j], state.categories[i]];
+    renderCategories();
+    const r = await api('/api/admin/categories/reorder', { method: 'POST', body: { ids: state.categories.map(c => c.id) } });
+    if (!r.ok) { toast(errorText(r), 'err'); loadCategories(); }
+  }
+
+  // ---------------------------------------------------------------- reports
+  const ACTION_TEXT = {
+    'admin.login': 'เข้าสู่หลังบ้าน', 'customer.create': 'เพิ่มลูกค้า', 'customer.update': 'แก้ไขลูกค้า', 'customer.reset_sessions': 'เตะลูกค้าออกทุกเครื่อง',
+    'video.create': 'เพิ่มวิดีโอ', 'video.update': 'แก้ไขวิดีโอ', 'video.delete': 'ลบวิดีโอ', 'video.reorder': 'เรียงลำดับวิดีโอ',
+    'category.create': 'เพิ่มหมวด', 'category.update': 'แก้ไขหมวด', 'category.delete': 'ลบหมวด', 'category.reorder': 'เรียงลำดับหมวด',
+  };
+
+  function reportParams(format) {
+    const p = new URLSearchParams({ type: state.reportType });
+    if ($('reportFrom').value) p.set('from', $('reportFrom').value);
+    if ($('reportTo').value) p.set('to', $('reportTo').value);
+    if ($('reportQuery').value.trim()) p.set('q', $('reportQuery').value.trim());
+    if (format) p.set('format', format);
+    return p.toString();
+  }
+
+  async function loadReport(e) {
+    e?.preventDefault();
+    if (!$('reportFrom').value && !e) $('reportFrom').value = daysAgoInput(30);
+    document.querySelectorAll('.report-type').forEach(b => {
+      const on = b.dataset.type === state.reportType;
+      b.className = `report-type px-4 py-2 rounded-xl text-sm font-medium ${on ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+    });
+    const isActions = state.reportType === 'actions';
+    $('reportForm').classList.toggle('hidden', isActions);
+    $('reportCsv').href = `/api/admin/reports/logs?${reportParams('csv')}`;
+    $('reportBody').innerHTML = `<tr><td colspan="5">${loading()}</td></tr>`;
+
+    if (isActions) {
+      $('reportHead').innerHTML = '<tr><th class="px-4 py-3 font-medium">วันเวลา</th><th class="px-4 py-3 font-medium">แอดมิน</th><th class="px-4 py-3 font-medium">การกระทำ</th><th class="px-4 py-3 font-medium">รายละเอียด</th></tr>';
+      const r = await api('/api/admin/actions');
+      if (!r.ok) { $('reportBody').innerHTML = `<tr><td colspan="4">${empty(errorText(r))}</td></tr>`; return; }
+      $('reportCount').textContent = `${r.data.actions.length} รายการล่าสุด`;
+      $('reportBody').innerHTML = r.data.actions.map(a => `<tr>
+        <td class="px-4 py-2.5 whitespace-nowrap text-slate-500">${fmtDateTime(a.created_at)}</td>
+        <td class="px-4 py-2.5">${esc(a.admin || '—')}</td>
+        <td class="px-4 py-2.5 whitespace-nowrap">${esc(ACTION_TEXT[a.action] || a.action)}</td>
+        <td class="px-4 py-2.5 text-slate-500 text-xs max-w-md truncate">${esc(a.detail ? Object.entries(a.detail).map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' · ') : '')}</td>
+      </tr>`).join('') || `<tr><td colspan="4">${empty('ยังไม่มีประวัติ')}</td></tr>`;
+      return;
+    }
+
+    const watch = state.reportType === 'watch';
+    $('reportHead').innerHTML = `<tr><th class="px-4 py-3 font-medium">วันเวลา</th><th class="px-4 py-3 font-medium">รหัส</th><th class="px-4 py-3 font-medium">ลูกค้า</th><th class="px-4 py-3 font-medium">${watch ? 'วิดีโอ' : 'อุปกรณ์'}</th></tr>`;
+    const r = await api(`/api/admin/reports/logs?${reportParams()}`);
+    if (!r.ok) { $('reportBody').innerHTML = `<tr><td colspan="4">${empty(errorText(r))}</td></tr>`; return; }
+    const rows = r.data.rows;
+    $('reportCount').textContent = `${rows.length.toLocaleString('th-TH')} รายการ${r.data.truncated ? ' (แสดงสูงสุด 5,000 รายการล่าสุด กรุณาแคบช่วงวันที่)' : ''}`;
+    const device = ua => !ua ? '—' : /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : /Mac OS/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'อื่นๆ';
+    $('reportBody').innerHTML = rows.map(x => `<tr>
+      <td class="px-4 py-2.5 whitespace-nowrap text-slate-500">${fmtDateTime(x.created_at)}</td>
+      <td class="px-4 py-2.5 font-mono text-xs whitespace-nowrap">${esc(x.code_snapshot)}</td>
+      <td class="px-4 py-2.5">${esc(x.name_snapshot || '—')}</td>
+      <td class="px-4 py-2.5">${watch ? esc(x.video_title_snapshot || '—') : esc(device(x.user_agent))}</td>
+    </tr>`).join('') || `<tr><td colspan="4">${empty('ไม่มีข้อมูลในช่วงนี้')}</td></tr>`;
+  }
+
+  // ---------------------------------------------------------------- events
+  $('loginForm').addEventListener('submit', login);
+  $('logoutBtn').addEventListener('click', logout);
+  document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+  window.addEventListener('hashchange', () => state.admin && switchTab(location.hash.slice(1)));
+  $('customerSearch').addEventListener('input', debounce(renderCustomers, 150));
+  $('customerStatus').addEventListener('change', renderCustomers);
+  $('videoSearch').addEventListener('input', debounce(renderVideos, 150));
+  $('videoCategory').addEventListener('change', renderVideos);
+  $('categoryForm').addEventListener('submit', addCategory);
+  $('reportForm').addEventListener('submit', loadReport);
+  $('reportCsv').addEventListener('click', () => { $('reportCsv').href = `/api/admin/reports/logs?${reportParams('csv')}`; });
+  document.querySelectorAll('.report-type').forEach(b => b.addEventListener('click', () => { state.reportType = b.dataset.type; loadReport({ preventDefault() {} }); }));
+  $('modal').addEventListener('mousedown', e => { if (e.target === $('modal')) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('modal').classList.contains('hidden')) closeModal(); });
+
+  document.addEventListener('click', async e => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const { action, id } = el.dataset;
+    const cust = () => state.customers.find(c => c.id === id);
+    const vid = () => state.videos.find(v => v.id === id);
+    const cat = () => state.categories.find(c => String(c.id) === id);
+    switch (action) {
+      case 'modal-close': return closeModal();
+      case 'customer-new': return customerForm(null);
+      case 'customer-edit': {
+        let c = cust();
+        if (!c) { const r = await api('/api/admin/customers'); if (r.ok) { state.customers = r.data.customers; c = cust(); } }
+        return c ? customerForm(c) : toast(ERR.not_found, 'err');
+      }
+      case 'customer-copy': return (await copyText(lineMessage(cust()))) ? toast('คัดลอกข้อความแล้ว วางใน LINE ได้เลย') : toast('คัดลอกไม่สำเร็จ', 'err');
+      case 'customer-toggle': return toggleCustomer(cust());
+      case 'customer-reset': return resetCustomer(id);
+      case 'video-new': if (!state.categories.length) { const r = await api('/api/admin/categories'); if (r.ok) state.categories = r.data.categories; } return videoForm(null);
+      case 'video-edit': return videoForm(vid());
+      case 'video-publish': return togglePublish(vid());
+      case 'video-delete': return deleteVideo(vid());
+      case 'video-up': return moveVideo(id, -1);
+      case 'video-down': return moveVideo(id, 1);
+      case 'cat-rename': return renameCategory(cat());
+      case 'cat-delete': return deleteCategory(cat());
+      case 'cat-up': return moveCategory(Number(id), -1);
+      case 'cat-down': return moveCategory(Number(id), 1);
+    }
+  });
+
+  // ---------------------------------------------------------------- boot
+  (async () => {
+    const r = await api('/api/admin/me');
+    document.body.classList.remove('booting');
+    if (r.ok) enterApp(r.data); else $('loginEmail').focus();
+  })();
+  </script>
+</body>
+</html>

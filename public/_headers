@@ -9,3 +9,8 @@
 
 /index.html
   Cache-Control: no-cache
+
+/admin/*
+  Cache-Control: no-cache
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'

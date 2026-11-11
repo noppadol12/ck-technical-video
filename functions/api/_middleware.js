@@ -1,4 +1,5 @@
-import { fail } from '../../lib/http.js';
+import { fail, json } from '../../lib/http.js';
+import { BadInput } from '../../lib/validate.js';
 
 // ใช้กับทุก /api/*: กัน cross-site POST และจับ error ไม่ให้รายละเอียดหลุดไปหน้าเว็บ
 export async function onRequest(context) {
@@ -14,6 +15,7 @@ export async function onRequest(context) {
     res.headers.set('X-Content-Type-Options', 'nosniff');
     return res;
   } catch (err) {
+    if (err instanceof BadInput) return json({ error: 'invalid_input', field: err.field, reason: err.message }, 400);
     console.error(`[api] ${request.method} ${new URL(request.url).pathname}:`, err?.stack || err);
     return fail(500, 'server_error');
   }
