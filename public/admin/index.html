@@ -420,7 +420,7 @@
           </div>
         </div>
         <div class="flex flex-wrap gap-2 shrink-0">
-          <button data-action="customer-copy" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-[#00B900]/10 text-[#00A000] hover:bg-[#00B900]/20 font-medium" title="คัดลอกข้อความส่ง LINE"><i class="fab fa-line mr-1"></i>คัดลอก</button>
+          <button data-action="customer-copy" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-brand-100 text-brand-700 hover:bg-brand-50 font-medium" title="คัดลอกรหัสลูกค้า"><i class="far fa-copy mr-1"></i>คัดลอกรหัส</button>
           <button data-action="customer-edit" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200 font-medium"><i class="fas fa-pen mr-1"></i>แก้ไข</button>
           <button data-action="customer-toggle" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm font-medium ${c.active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}">${c.active ? '<i class="fas fa-ban mr-1"></i>ปิดสิทธิ์' : '<i class="fas fa-check mr-1"></i>เปิดสิทธิ์'}</button>
         </div>
@@ -990,7 +990,7 @@
         if (!c) { const r = await api('/api/admin/customers'); if (r.ok) { state.customers = r.data.customers; c = cust(); } }
         return c ? customerForm(c) : toast(ERR.not_found, 'err');
       }
-      case 'customer-copy': return (await copyText(lineMessage(cust()))) ? toast('คัดลอกข้อความแล้ว วางใน LINE ได้เลย') : toast('คัดลอกไม่สำเร็จ', 'err');
+      case 'customer-copy': return (await copyText(cust().code)) ? toast(`คัดลอกรหัส ${cust().code} แล้ว`) : toast('คัดลอกไม่สำเร็จ', 'err');
       case 'customer-toggle': return toggleCustomer(cust());
       case 'customer-reset': return resetCustomer(id);
       case 'video-new': if (!state.categories.length) { const r = await api('/api/admin/categories'); if (r.ok) state.categories = r.data.categories; } return videoForm(null);
