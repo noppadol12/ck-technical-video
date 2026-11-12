@@ -1,231 +1,199 @@
 <!DOCTYPE html>
-<html lang="th" class="scroll-smooth">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CK Aircond - Technical Video</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CK Technical — คลังวิดีโอสอนติดตั้ง</title>
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#F6F8FB">
 
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="/styles.css" rel="stylesheet">
 
   <style>
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    body { background-color: #f8fafc; }
-
-    .glass-nav {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-    .glass-play-btn {
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-    }
-
-    @keyframes slideInDown {
-      from { transform: translate(-50%, -100%); opacity: 0; }
-      to { transform: translate(-50%, 0); opacity: 1; }
-    }
-    .toast-enter { animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-    .btn-press:active { transform: scale(0.97); }
-    .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .card-hover:hover { transform: translateY(-6px); }
-
-    /* ซ่อนทุกหน้าจนกว่าจะรู้ว่าล็อกอินอยู่หรือไม่ กันหน้าล็อกอินกระพริบ */
+    body { background: #F6F8FB; color: #0F172A; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #CBD3DF; border-radius: 10px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+    @keyframes toastIn { from { transform: translate(-50%, -16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    .toast-enter { animation: toastIn .3s ease-out forwards; }
+    .card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -12px rgba(15, 23, 42, .18); border-color: #CFD8E6; }
+    .card:hover .cover-img { transform: scale(1.03); }
+    .cover-img { transition: transform .4s ease; }
+    /* ซ่อนจนกว่าจะรู้ว่าล็อกอินอยู่หรือไม่ กันหน้าล็อกอินกระพริบ */
     body.booting #loginPage, body.booting #mainPage { visibility: hidden; }
   </style>
 </head>
-<body class="booting text-slate-800 antialiased h-screen flex flex-col overflow-hidden selection:bg-brand-500 selection:text-white">
+<body class="booting font-sans antialiased min-h-screen selection:bg-brand-600 selection:text-white">
 
-  <!-- ========================= TOAST & MODAL ========================= -->
-  <div id="toastMessage" role="alert" class="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] hidden items-center bg-red-600/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-[0_10px_40px_-10px_rgba(220,38,38,0.5)] border border-red-500 transition-all">
-    <i class="fas fa-exclamation-circle text-lg mr-3"></i>
-    <span id="toastText" class="font-medium text-sm sm:text-base tracking-wide">ข้อความแจ้งเตือน</span>
+  <!-- ========================= TOAST ========================= -->
+  <div id="toastMessage" role="alert" class="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] hidden items-center gap-3 bg-ink text-white pl-4 pr-5 py-3 rounded-xl shadow-lg max-w-[92vw]">
+    <i class="fas fa-circle-exclamation text-red-400"></i>
+    <span id="toastText" class="text-sm font-medium">ข้อความแจ้งเตือน</span>
   </div>
 
-  <div id="confirmModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-    <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-sm w-[90%] shadow-2xl border border-white transform scale-95 transition-transform duration-300" id="confirmBox">
-      <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
-        <i class="fas fa-sign-out-alt text-2xl ml-1"></i>
+  <!-- ========================= LOGOUT MODAL ========================= -->
+  <div id="confirmModal" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-ink/40 p-4">
+    <div id="confirmBox" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" class="bg-white rounded-2xl p-6 w-full max-w-sm border border-line shadow-xl">
+      <div class="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
+        <i class="fas fa-arrow-right-from-bracket"></i>
       </div>
-      <h3 class="text-xl font-bold text-center text-slate-800 mb-2 tracking-tight">ออกจากระบบ</h3>
-      <p class="text-center text-slate-500 mb-7 font-light text-sm">คุณต้องการออกจากระบบรับชมวิดีโอเทคนิคอลใช่หรือไม่?</p>
-      <div class="flex gap-3">
-        <button id="cancelLogoutBtn" class="flex-1 bg-slate-100/80 hover:bg-slate-200 text-slate-700 font-medium py-3.5 rounded-2xl transition-colors btn-press">ยกเลิก</button>
-        <button id="confirmLogoutBtn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-3.5 rounded-2xl shadow-[0_8px_20px_-6px_rgba(220,38,38,0.5)] transition-all btn-press">ยืนยัน</button>
+      <h3 id="confirmTitle" class="text-lg font-semibold mb-1">ออกจากระบบ?</h3>
+      <p class="text-sm text-muted mb-6">ต้องใส่รหัสลูกค้าอีกครั้งเมื่อกลับมาใช้งานบนเครื่องนี้</p>
+      <div class="flex gap-2.5">
+        <button id="cancelLogoutBtn" class="flex-1 h-11 rounded-xl bg-[#F1F4F9] hover:bg-[#E6EBF2] font-medium text-sm transition-colors">ยกเลิก</button>
+        <button id="confirmLogoutBtn" class="flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition-colors">ออกจากระบบ</button>
       </div>
     </div>
   </div>
 
-  <!-- ========================= LOGIN PAGE ========================= -->
-  <div id="loginPage" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-opacity duration-500">
-    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-brand-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-300/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
-
-    <form id="loginForm" class="glass-card p-8 sm:p-10 rounded-[2.5rem] shadow-glass w-[90%] max-w-md text-center relative z-10" novalidate>
-      <div class="w-20 h-20 bg-gradient-to-tr from-brand-600 to-blue-400 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-float rotate-3 hover:rotate-0 transition-transform duration-300">
-        <i class="fas fa-play text-3xl ml-1"></i>
-      </div>
-      <h1 class="text-3xl font-bold text-slate-800 mb-2 tracking-tight">CK TECHNICAL</h1>
-      <p class="text-sm text-slate-500 mb-10 font-light tracking-wide">ระบบวิดีโอคู่มือช่างพรีเมียม</p>
-
-      <div class="space-y-5">
-        <div class="relative group">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-brand-500 transition-colors">
-            <i class="fas fa-lock"></i>
-          </div>
-          <label for="custCode" class="sr-only">รหัสลูกค้า</label>
-          <input type="text" id="custCode" name="code" placeholder="ระบุรหัสลูกค้าเพื่อเข้าชม" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="64"
-                 class="w-full pl-11 pr-5 py-4 bg-white/80 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all font-medium placeholder:font-light text-slate-700 shadow-sm">
+  <!-- ========================= LOGIN ========================= -->
+  <main id="loginPage" class="min-h-screen flex flex-col items-center justify-center px-5 py-10">
+    <div class="w-full max-w-[400px]">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-sm">
+          <i class="fas fa-play text-sm ml-0.5"></i>
         </div>
-        <button id="loginBtn" type="submit"
-                class="w-full bg-slate-900 hover:bg-brand-600 text-white font-medium py-4 px-4 rounded-2xl shadow-float transition-all duration-300 btn-press flex justify-center items-center gap-2">
-          <span>เข้าสู่ระบบเทคนิคอล</span>
-          <i class="fas fa-arrow-right text-sm"></i>
+        <div class="leading-tight">
+          <div class="font-bold text-[17px]">CK Technical</div>
+          <div class="text-xs text-muted">ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์</div>
+        </div>
+      </div>
+
+      <h1 class="text-[28px] sm:text-[32px] font-bold leading-tight tracking-tight mb-2">คลังวิดีโอสอนติดตั้ง<br><span class="text-brand-600">สำหรับช่างและลูกค้า</span></h1>
+      <p class="text-[15px] text-[#3A4352] mb-7">วิดีโอสอนติดตั้ง ตั้งค่า และแผนผังวงจรอุปกรณ์ควบคุมระบบปรับอากาศ</p>
+
+      <form id="loginForm" class="bg-white border border-line rounded-2xl p-5 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,.04)]" novalidate>
+        <label for="custCode" class="block text-sm font-semibold mb-2">รหัสลูกค้า</label>
+        <div class="relative mb-4">
+          <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3] text-sm"></i>
+          <input type="text" id="custCode" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                 placeholder="เช่น CK-0812345678"
+                 class="w-full h-[52px] pl-11 pr-4 rounded-xl bg-[#F1F4F9] border border-transparent focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15 outline-none text-[16px] font-medium tracking-wide transition">
+        </div>
+        <button type="submit" id="loginBtn" class="w-full h-[52px] rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-[.99] text-white font-semibold text-[15px] flex items-center justify-center gap-2 transition">
+          <span>เข้าสู่ระบบ</span><i class="fas fa-arrow-right text-sm"></i>
         </button>
+        <p class="text-xs text-muted mt-3.5 flex items-center gap-1.5"><i class="fas fa-shield-halved text-[11px]"></i>จำการเข้าสู่ระบบไว้ 30 วันบนเครื่องนี้</p>
+      </form>
+
+      <div id="loginStats" class="grid grid-cols-3 gap-2.5 mt-5">
+        <div class="bg-white border border-line rounded-xl px-3 py-3"><div id="statVideos" class="text-xl font-bold">–</div><div class="text-[11px] text-muted">วิดีโอสอน</div></div>
+        <div class="bg-white border border-line rounded-xl px-3 py-3"><div id="statDocs" class="text-xl font-bold">–</div><div class="text-[11px] text-muted">แผนผัง PDF</div></div>
+        <div class="bg-white border border-line rounded-xl px-3 py-3"><div id="statCats" class="text-xl font-bold">–</div><div class="text-[11px] text-muted">หมวดอุปกรณ์</div></div>
       </div>
 
-      <div class="mt-10 pt-6 border-t border-slate-100/50">
-        <p class="text-[11px] text-slate-400">สงวนสิทธิ์เฉพาะลูกค้าและช่างในเครือ</p>
-        <p class="text-[11px] text-slate-500 font-semibold mt-1">ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์</p>
+      <p class="text-[13px] text-muted mt-6">ยังไม่มีรหัส? ติดต่อ LINE <a href="https://line.me/R/ti/p/@ckaircond" target="_blank" rel="noopener" class="text-brand-600 font-medium hover:underline">@ckaircond</a> หรือโทร <a href="tel:0808265970" class="text-brand-600 font-medium hover:underline">080-826-5970</a></p>
+    </div>
+  </main>
+
+  <!-- ========================= MAIN ========================= -->
+  <div id="mainPage" class="hidden min-h-screen flex-col">
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-line">
+      <div class="max-w-[1320px] mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="w-9 h-9 rounded-[10px] bg-brand-600 text-white flex items-center justify-center"><i class="fas fa-play text-xs ml-0.5"></i></div>
+          <div class="leading-tight hidden sm:block">
+            <div class="font-bold text-[15px]">CK Technical</div>
+            <div class="text-[11px] text-muted">ศูนย์ความรู้งานติดตั้ง · ซี.เค.แอร์คอนด์</div>
+          </div>
+        </div>
+
+        <div class="relative flex-1 max-w-xl mx-auto">
+          <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98A2B3] text-sm"></i>
+          <input type="search" id="searchInput" placeholder="ค้นหารุ่นอุปกรณ์ เช่น TFM223, VA9104, PICV"
+                 class="w-full h-10 pl-10 pr-3 rounded-[10px] bg-[#F1F4F9] border border-transparent focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15 outline-none text-sm transition">
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <div class="hidden md:flex items-center gap-2 h-10 pl-1.5 pr-3 rounded-full border border-line max-w-[220px]">
+            <span class="w-7 h-7 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs"><i class="fas fa-user"></i></span>
+            <span id="userName" class="text-[13px] font-medium truncate"></span>
+          </div>
+          <button id="logoutBtn" title="ออกจากระบบ" class="h-10 px-3 rounded-[10px] border border-line hover:bg-[#F1F4F9] text-[13px] font-medium flex items-center gap-2 transition-colors">
+            <i class="fas fa-arrow-right-from-bracket text-muted"></i><span class="hidden sm:inline">ออกจากระบบ</span>
+          </button>
+        </div>
       </div>
-    </form>
+    </header>
+
+    <div class="flex-1 max-w-[1320px] w-full mx-auto px-4 sm:px-6 py-6 lg:py-8 flex gap-7 items-start">
+      <!-- Sidebar (desktop) -->
+      <aside class="hidden lg:block w-[260px] shrink-0 sticky top-24">
+        <nav class="bg-white border border-line rounded-2xl p-3">
+          <div class="px-3 pt-1 pb-2 text-[11px] font-semibold text-muted tracking-wider">หมวดอุปกรณ์</div>
+          <div id="categoryNav" class="flex flex-col gap-0.5"></div>
+        </nav>
+      </aside>
+
+      <section class="flex-1 min-w-0">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+          <div>
+            <h2 class="text-2xl sm:text-[28px] font-bold tracking-tight">คลังวิดีโอเทคนิค</h2>
+            <p id="libSummary" class="text-sm text-muted mt-1">&nbsp;</p>
+          </div>
+          <div id="typeFilter" role="tablist" class="inline-flex p-1 bg-white border border-line rounded-xl self-start sm:self-auto">
+            <button data-type="" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium">ทั้งหมด</button>
+            <button data-type="video" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium"><i class="fas fa-play text-[10px] mr-1.5"></i>วิดีโอ</button>
+            <button data-type="pdf" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium"><i class="fas fa-file-lines text-[11px] mr-1.5"></i>แผนผัง PDF</button>
+          </div>
+        </div>
+
+        <!-- Category chips (mobile/tablet) -->
+        <div id="categoryChips" class="lg:hidden flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 pb-1 mb-5"></div>
+
+        <div id="loadingState" class="hidden grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
+          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+        </div>
+        <div id="videoGrid" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5"></div>
+      </section>
+    </div>
+
+    <footer class="border-t border-line bg-white mt-8">
+      <div class="max-w-[1320px] mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between text-[13px] text-muted">
+        <span>© ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์</span>
+        <span class="flex flex-wrap gap-x-4 gap-y-1">
+          <a href="https://line.me/R/ti/p/@ckaircond" target="_blank" rel="noopener" class="hover:text-ink"><i class="fab fa-line mr-1"></i>@ckaircond</a>
+          <a href="tel:0808265970" class="hover:text-ink"><i class="fas fa-phone mr-1 text-[11px]"></i>080-826-5970</a>
+          <a href="https://www.ckaircond.com" target="_blank" rel="noopener" class="hover:text-ink"><i class="fas fa-globe mr-1 text-[11px]"></i>ckaircond.com</a>
+        </span>
+      </div>
+    </footer>
   </div>
 
-  <!-- ========================= MAIN APP PAGE ========================= -->
-  <div id="mainPage" class="hidden flex-col h-full w-full opacity-0 transition-opacity duration-500">
-
-    <nav class="glass-nav sticky top-0 z-30 flex-none">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 sm:h-20 items-center">
-          <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-tr from-brand-600 to-brand-400 text-white p-2.5 rounded-xl shadow-md">
-              <i class="fas fa-play text-sm sm:text-base ml-0.5"></i>
-            </div>
-            <span class="font-bold text-lg sm:text-xl text-slate-800 tracking-tight">CK Technical</span>
-          </div>
-          <div class="flex items-center gap-2 sm:gap-4">
-            <div class="hidden sm:flex items-center bg-white/50 px-4 py-2 rounded-2xl text-sm font-medium text-slate-600 border border-slate-200 shadow-sm backdrop-blur-sm">
-              <div class="w-6 h-6 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center mr-2">
-                <i class="fas fa-user text-xs"></i>
-              </div>
-              <span id="userName">User</span>
-            </div>
-            <button id="logoutBtn" class="flex items-center justify-center bg-white border border-slate-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 text-slate-500 w-10 h-10 sm:w-auto sm:px-5 sm:h-10 rounded-2xl text-sm font-medium transition-all shadow-sm btn-press group" aria-label="ออกจากระบบ">
-              <i class="fas fa-sign-out-alt sm:mr-2 group-hover:scale-110 transition-transform"></i>
-              <span class="hidden sm:inline">ออกจากระบบ</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <div class="bg-white/60 backdrop-blur-md border-b border-slate-200/50 shadow-sm flex-none z-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="relative flex-grow group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <i class="fas fa-search text-slate-400 group-focus-within:text-brand-500 transition-colors"></i>
-            </div>
-            <input type="search" id="searchInput" placeholder="ค้นหาวิดีโอเทคนิคที่ต้องการ..." aria-label="ค้นหาวิดีโอ"
-                   class="block w-full pl-11 pr-4 py-3 sm:py-3.5 border border-slate-200 rounded-2xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-sm sm:text-base shadow-sm">
-          </div>
-          <div class="relative sm:min-w-[220px]">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <i class="fas fa-layer-group text-slate-400"></i>
-            </div>
-            <select id="categoryFilter" aria-label="หมวดหมู่"
-                    class="block w-full pl-11 pr-10 py-3 sm:py-3.5 border border-slate-200 rounded-2xl leading-5 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-sm sm:text-base appearance-none cursor-pointer shadow-sm font-medium text-slate-700">
-              <option value="">ทุกหมวดหมู่</option>
-            </select>
-            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-              <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
-            </div>
-          </div>
-        </div>
-      </div>
+  <!-- ========================= PLAYER ========================= -->
+  <div id="playerOverlay" class="fixed inset-0 z-[9990] bg-[#0B1220]/95 flex-col" style="display:none">
+    <div class="h-16 shrink-0 flex items-center gap-3 px-4 sm:px-6 text-white">
+      <span id="playingKind" class="text-[11px] font-semibold px-2 py-1 rounded-md bg-white/10 shrink-0">วิดีโอ</span>
+      <h3 id="playingTitle" class="flex-1 min-w-0 truncate font-medium text-[15px]"></h3>
+      <button id="closePlayerBtn" aria-label="ปิด" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"><i class="fas fa-xmark text-lg"></i></button>
     </div>
-
-    <div class="flex-1 overflow-y-auto relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
-
-        <div id="loadingState" class="hidden flex-col items-center justify-center py-24">
-          <div class="relative w-16 h-16 mb-6">
-            <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-brand-600 rounded-full border-t-transparent animate-spin"></div>
-          </div>
-          <p class="text-slate-500 font-medium tracking-wide animate-pulse">กำลังจัดเตรียมเนื้อหาวิดีโอ...</p>
-        </div>
-
-        <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"></div>
-      </div>
-
-      <footer class="bg-white border-t border-slate-200 mt-auto w-full shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12 text-center">
-          <h4 class="font-semibold text-slate-800 mb-6 text-sm sm:text-base tracking-wide">ศูนย์บริการข้อมูลเทคนิค ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์</h4>
-          <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
-            <a href="https://page.line.me/895jvfck" target="_blank" rel="noopener" class="inline-flex items-center px-5 py-2.5 rounded-2xl bg-[#00B900]/10 text-[#00B900] hover:bg-[#00B900] hover:text-white transition-all duration-300 text-xs sm:text-sm font-semibold border border-[#00B900]/20 btn-press">
-              <i class="fab fa-line mr-2 text-lg"></i> @ckaircond
-            </a>
-            <a href="tel:0808265970" class="inline-flex items-center px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-all duration-300 text-xs sm:text-sm font-semibold border border-slate-200 btn-press">
-              <i class="fas fa-phone-alt mr-2"></i> 080-8265970
-            </a>
-            <a href="https://www.ckaircond.com" target="_blank" rel="noopener" class="inline-flex items-center px-5 py-2.5 rounded-2xl bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white transition-all duration-300 text-xs sm:text-sm font-semibold border border-brand-200 btn-press">
-              <i class="fas fa-globe mr-2"></i> เว็บไซต์
-            </a>
-          </div>
-          <p class="text-xs text-slate-500 mt-8 font-light">&copy; 2026 ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์. Premium Technical Portal.</p>
-        </div>
-      </footer>
-    </div>
-  </div>
-
-  <!-- ========================= PLAYER OVERLAY ========================= -->
-  <div id="playerOverlay" style="display: none;" class="fixed inset-0 bg-slate-900/95 z-[100] flex-col backdrop-blur-xl transition-opacity" role="dialog" aria-modal="true" aria-labelledby="playingTitle">
-    <div class="flex justify-between items-start p-4 sm:p-6 bg-gradient-to-b from-black/80 to-transparent absolute top-0 w-full z-10">
-      <div class="max-w-[75%]">
-        <h2 id="playingTitle" class="text-white font-semibold text-lg md:text-2xl drop-shadow-md line-clamp-2 tracking-tight"></h2>
-        <p class="text-slate-300 text-xs md:text-sm mt-1.5 font-light">ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์ | Technical Guide</p>
-      </div>
-      <button id="closePlayerBtn" class="bg-white/10 hover:bg-red-600 text-white rounded-full sm:rounded-2xl w-10 h-10 sm:w-auto sm:px-4 sm:py-2.5 backdrop-blur-md transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 border border-white/20 shadow-lg group cursor-pointer z-50 btn-press" aria-label="ปิดการรับชม">
-        <i class="fas fa-times sm:group-hover:rotate-90 transition-transform duration-300"></i>
-        <span class="text-sm font-medium hidden sm:inline">ปิดการรับชม</span>
-      </button>
-    </div>
-
-    <div class="flex-1 flex items-center justify-center w-full h-full pt-20 pb-4 px-0 sm:p-8 md:p-16">
-      <div class="w-full max-w-6xl bg-black rounded-none sm:rounded-[2rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative flex items-center justify-center border-0 sm:border border-white/10" id="videoWrapper" style="aspect-ratio: 16/9; max-height: calc(100vh - 100px);"></div>
+    <div class="flex-1 min-h-0 flex items-center justify-center px-3 sm:px-6 pb-6">
+      <div id="videoWrapper" class="relative w-full max-w-6xl aspect-video max-h-full rounded-xl overflow-hidden bg-black flex items-center justify-center"></div>
     </div>
   </div>
 
-  <!-- ========================= SCRIPTS ========================= -->
   <script>
     'use strict';
 
     const $ = id => document.getElementById(id);
     let allVideos = [];
+    const filters = { category: '', type: '' };
 
     const ERROR_TEXT = {
-      invalid_code: 'ไม่พบรหัสผู้ใช้งานนี้ในระบบ หรือพิมพ์ผิด',
+      invalid_code: 'ไม่พบรหัสลูกค้านี้ในระบบ หรือพิมพ์ผิด',
       code_expired: 'รหัสนี้หมดอายุแล้ว กรุณาติดต่อ ซี.เค.แอร์คอนด์ เพื่อต่ออายุ',
       too_many_attempts: 'ใส่รหัสผิดหลายครั้ง กรุณารอ 5 นาทีแล้วลองใหม่',
       unauthorized: 'กรุณาเข้าสู่ระบบอีกครั้ง',
-      not_found: 'ไม่พบวิดีโอนี้ หรือวิดีโอถูกปิดการแสดงแล้ว',
+      not_found: 'ไม่พบรายการนี้ หรือถูกปิดการแสดงแล้ว',
       network: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่',
     };
 
@@ -246,25 +214,24 @@
         return { ok: false, status: 0, data: { error: 'network' } };
       }
     }
-
     const errorText = r => ERROR_TEXT[r.data?.error] || ERROR_TEXT.network;
 
-    // ---------- สีหมวดหมู่ ----------
-    const autoPalette = [
-      'bg-blue-50 text-blue-600 border-blue-200/60',
-      'bg-emerald-50 text-emerald-600 border-emerald-200/60',
-      'bg-amber-50 text-amber-600 border-amber-200/60',
-      'bg-purple-50 text-purple-600 border-purple-200/60',
-      'bg-rose-50 text-rose-600 border-rose-200/60',
-      'bg-cyan-50 text-cyan-600 border-cyan-200/60',
-      'bg-indigo-50 text-indigo-600 border-indigo-200/60',
-      'bg-orange-50 text-orange-600 border-orange-200/60'
-    ];
-    function getCategoryColor(category) {
-      if (!category) return 'bg-slate-50 text-slate-600 border-slate-200';
-      let hash = 0;
-      for (let i = 0; i < category.length; i++) hash = category.charCodeAt(i) + ((hash << 5) - hash);
-      return autoPalette[Math.abs(hash) % autoPalette.length];
+    // ---------- ข้อความบนปก ----------
+    const cleanTitle = t => String(t || '').replace(/\.mp4$/i, '').replace(/^PDF\s*-\s*/i, '').trim();
+    function modelCode(v) {
+      const m = cleanTitle(v.title).match(/\b[A-Z]{1,5}-?\d{2,5}[A-Z0-9]*\b/g) || [];
+      const code = m.find(x => !/^DN\d/.test(x));
+      if (code) return code;
+      const latin = String(v.category || '').match(/[A-Za-z][A-Za-z0-9 ]*/);
+      return latin ? latin[0].trim() : 'CK';
+    }
+    function brandOf(title) {
+      const t = String(title || '').toLowerCase();
+      if (t.includes('honeywell')) return 'HONEYWELL';
+      if (t.includes('johnson')) return 'JOHNSON CONTROLS';
+      if (t.includes('frese') || t.includes('ffese')) return 'FRESE';
+      if (t.includes('elitech')) return 'ELITECH';
+      return 'CK TECHNICAL';
     }
 
     // ---------- Toast ----------
@@ -276,54 +243,51 @@
       void toast.offsetWidth;
       toast.classList.add('flex', 'toast-enter');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.add('hidden'), 4000);
+      toastTimer = setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('flex'); }, 4000);
     }
 
     // ---------- เปลี่ยนหน้า ----------
-    function showMain(name, animate = true) {
-      $('userName').innerText = name;
-      const loginPage = $('loginPage');
-      const mainPage = $('mainPage');
-      loginPage.classList.add('opacity-0', 'pointer-events-none');
-      setTimeout(() => {
-        loginPage.classList.add('hidden');
-        mainPage.classList.remove('hidden');
-        mainPage.classList.add('flex');
-        setTimeout(() => mainPage.classList.remove('opacity-0'), 50);
-      }, animate ? 500 : 0);
+    function showMain(name) {
+      $('userName').innerText = name || '';
+      $('loginPage').classList.add('hidden');
+      $('mainPage').classList.remove('hidden');
+      $('mainPage').classList.add('flex');
+      window.scrollTo(0, 0);
       loadVideos();
     }
 
     function showLogin() {
       closePlayer();
+      closeConfirmModal();
       allVideos = [];
+      filters.category = ''; filters.type = '';
       $('custCode').value = '';
       $('searchInput').value = '';
-      $('categoryFilter').value = '';
       $('videoGrid').innerHTML = '';
       resetLoginBtn();
-
-      const loginPage = $('loginPage');
-      const mainPage = $('mainPage');
-      mainPage.classList.add('opacity-0');
-      setTimeout(() => {
-        mainPage.classList.add('hidden');
-        mainPage.classList.remove('flex');
-        loginPage.classList.remove('hidden');
-        setTimeout(() => loginPage.classList.remove('opacity-0', 'pointer-events-none'), 50);
-      }, 300);
+      $('mainPage').classList.add('hidden');
+      $('mainPage').classList.remove('flex');
+      $('loginPage').classList.remove('hidden');
+      loadStats();
     }
 
-    // session หมดอายุ / ถูกปิดสิทธิ์ ระหว่างใช้งาน
     function handleUnauthorized() {
       showLogin();
       showCustomToast(ERROR_TEXT.unauthorized);
     }
 
+    async function loadStats() {
+      const r = await api('/api/stats');
+      if (!r.ok) { $('loginStats').classList.add('hidden'); return; }
+      $('statVideos').innerText = r.data.videos;
+      $('statDocs').innerText = r.data.documents;
+      $('statCats').innerText = r.data.categories;
+    }
+
     // ---------- Login ----------
     function resetLoginBtn() {
       const btn = $('loginBtn');
-      btn.innerHTML = '<span>เข้าสู่ระบบเทคนิคอล</span><i class="fas fa-arrow-right text-sm"></i>';
+      btn.innerHTML = '<span>เข้าสู่ระบบ</span><i class="fas fa-arrow-right text-sm"></i>';
       btn.disabled = false;
       btn.classList.remove('opacity-80', 'cursor-not-allowed');
     }
@@ -335,13 +299,13 @@
       const btn = $('loginBtn');
 
       if (!code) {
-        input.classList.add('border-red-400', 'ring-red-400/20', 'ring-4');
-        setTimeout(() => input.classList.remove('border-red-400', 'ring-red-400/20', 'ring-4'), 1500);
+        input.classList.add('border-red-500', 'ring-4', 'ring-red-500/15');
+        setTimeout(() => input.classList.remove('border-red-500', 'ring-4', 'ring-red-500/15'), 1500);
         input.focus();
         return;
       }
 
-      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i><span>กำลังตรวจสอบ...</span>';
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i><span>กำลังตรวจสอบ...</span>';
       btn.disabled = true;
       btn.classList.add('opacity-80', 'cursor-not-allowed');
 
@@ -351,7 +315,6 @@
         showMain(r.data.name);
         return;
       }
-
       showCustomToast(errorText(r));
       resetLoginBtn();
       if (r.data?.error === 'invalid_code') input.value = '';
@@ -360,29 +323,14 @@
 
     // ---------- Logout ----------
     function requestLogout() {
-      const modal = $('confirmModal');
-      const box = $('confirmBox');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        box.classList.remove('scale-95');
-        box.classList.add('scale-100');
-      }, 10);
+      const m = $('confirmModal');
+      m.classList.remove('hidden'); m.classList.add('flex');
+      $('cancelLogoutBtn').focus();
     }
-
     function closeConfirmModal() {
-      const modal = $('confirmModal');
-      const box = $('confirmBox');
-      modal.classList.add('opacity-0');
-      box.classList.remove('scale-100');
-      box.classList.add('scale-95');
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }, 300);
+      const m = $('confirmModal');
+      m.classList.add('hidden'); m.classList.remove('flex');
     }
-
     async function executeLogout() {
       closeConfirmModal();
       await api('/api/logout', { method: 'POST' });
@@ -394,98 +342,132 @@
       const grid = $('videoGrid');
       const loading = $('loadingState');
       grid.innerHTML = '';
-      loading.classList.remove('hidden');
-      loading.classList.add('flex');
+      loading.classList.remove('hidden'); loading.classList.add('grid');
 
       const r = await api('/api/videos');
-      loading.classList.add('hidden');
-      loading.classList.remove('flex');
+      loading.classList.add('hidden'); loading.classList.remove('grid');
 
       if (r.status === 401) return handleUnauthorized();
       if (!r.ok) {
         grid.innerHTML = `
-          <div class="col-span-full text-red-500 text-center py-24">
-            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-exclamation-triangle text-2xl"></i></div>
+          <div class="col-span-full bg-white border border-line rounded-2xl py-16 text-center">
+            <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3"><i class="fas fa-triangle-exclamation"></i></div>
             <p class="font-medium mb-4">โหลดข้อมูลไม่สำเร็จ</p>
-            <button id="retryBtn" class="px-5 py-2.5 rounded-2xl bg-slate-900 text-white text-sm font-medium btn-press">ลองอีกครั้ง</button>
+            <button id="retryBtn" class="h-10 px-5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium">ลองอีกครั้ง</button>
           </div>`;
         $('retryBtn').addEventListener('click', loadVideos);
         return;
       }
 
       allVideos = r.data.videos || [];
-      loadCategories(allVideos);
+      const vids = allVideos.filter(v => v.kind !== 'pdf').length;
+      const cats = new Set(allVideos.map(v => v.category)).size;
+      $('libSummary').innerText = `${vids} วิดีโอสอนติดตั้ง · ${allVideos.length - vids} แผนผังวงจร PDF · ${cats} หมวด`;
+      renderCategories();
       filterVideos();
+    }
+
+    function categoryList() {
+      const order = new Map();
+      allVideos.forEach(v => {
+        if (!v.category) return;
+        const o = order.get(v.category) || { sort: v.categoryOrder ?? 9999, count: 0 };
+        o.count++;
+        order.set(v.category, o);
+      });
+      return [...order.entries()]
+        .sort((a, b) => a[1].sort - b[1].sort || a[0].localeCompare(b[0], 'th'))
+        .map(([name, o]) => ({ name, count: o.count }));
+    }
+
+    function renderCategories() {
+      const cats = categoryList();
+      if (filters.category && !cats.some(c => c.name === filters.category)) filters.category = '';
+      const all = [{ name: '', label: 'ทั้งหมด', count: allVideos.length }, ...cats.map(c => ({ ...c, label: c.name }))];
+
+      $('categoryNav').innerHTML = all.map(c => {
+        const on = c.name === filters.category;
+        return `<button data-category="${escapeHtml(c.name)}" class="w-full flex items-center justify-between gap-2 h-10 px-3 rounded-[10px] text-[14px] text-left transition-colors ${on ? 'bg-brand-100 text-brand-700 font-semibold' : 'text-[#3A4352] hover:bg-[#F1F4F9]'}">
+          <span class="truncate">${escapeHtml(c.label)}</span>
+          <span class="text-[12px] ${on ? 'text-brand-600' : 'text-[#98A2B3]'}">${c.count}</span>
+        </button>`;
+      }).join('');
+
+      $('categoryChips').innerHTML = all.map(c => {
+        const on = c.name === filters.category;
+        return `<button data-category="${escapeHtml(c.name)}" class="shrink-0 h-9 px-3.5 rounded-full border text-[13px] whitespace-nowrap transition-colors ${on ? 'bg-brand-600 border-brand-600 text-white font-medium' : 'bg-white border-line text-[#3A4352]'}">${escapeHtml(c.label)}</button>`;
+      }).join('');
+    }
+
+    function renderTypePills() {
+      document.querySelectorAll('.type-pill').forEach(b => {
+        const on = b.dataset.type === filters.type;
+        b.classList.toggle('bg-brand-100', on);
+        b.classList.toggle('text-brand-700', on);
+        b.classList.toggle('text-muted', !on);
+        b.setAttribute('aria-selected', on);
+      });
+    }
+
+    function cardHtml(v) {
+      const pdf = v.kind === 'pdf';
+      const code = modelCode(v);
+      const thumb = !pdf && v.thumbnail
+        ? `<img src="${escapeHtml(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="cover-img absolute inset-0 w-full h-full object-cover" onerror="this.remove()">`
+        : '';
+      return `
+        <button type="button" data-video-id="${escapeHtml(v.id)}" class="card text-left bg-white border border-line rounded-2xl overflow-hidden flex flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-600/25">
+          <div class="relative aspect-video overflow-hidden ${pdf ? 'bg-pdf-bg' : 'bg-brand-50'}">
+            <div class="absolute inset-0 p-4 flex flex-col justify-between">
+              <span class="text-[10px] font-semibold tracking-[.14em] ${pdf ? 'text-pdf-fg/70' : 'text-[#3A4E7A]'}">${pdf ? 'WIRING DIAGRAM' : escapeHtml(brandOf(v.title))}</span>
+              <span class="text-[26px] sm:text-[30px] font-bold leading-none tracking-tight break-all line-clamp-2 ${pdf ? 'text-pdf-fg' : 'text-brand-900'}">${escapeHtml(code)}</span>
+            </div>
+            ${thumb}
+            <span class="absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${pdf ? 'bg-white text-pdf-fg' : 'bg-brand-600 text-white'}">
+              <i class="fas ${pdf ? 'fa-file-lines' : 'fa-play ml-0.5'} text-sm"></i>
+            </span>
+          </div>
+          <div class="p-4 flex flex-col gap-3 flex-1">
+            <h3 class="font-semibold text-[15px] leading-snug line-clamp-2">${escapeHtml(cleanTitle(v.title))}</h3>
+            <div class="mt-auto flex items-center justify-between gap-2 text-[12px]">
+              <span class="truncate px-2 py-1 rounded-md bg-[#F1F4F9] text-[#3A4352]">${escapeHtml(v.category)}</span>
+              <span class="shrink-0 font-medium ${pdf ? 'text-pdf-fg' : 'text-brand-600'}">${pdf ? 'แผนผัง PDF' : 'วิดีโอ'}</span>
+            </div>
+          </div>
+        </button>`;
     }
 
     function renderVideos(videos) {
       const grid = $('videoGrid');
-
       if (videos.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full flex flex-col items-center justify-center py-24 text-slate-400">
-            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-              <i class="fas fa-video-slash text-4xl opacity-50"></i>
-            </div>
-            <p class="text-lg font-medium text-slate-500">ไม่พบวิดีโอที่ตรงกับเงื่อนไข</p>
+          <div class="col-span-full bg-white border border-line rounded-2xl py-16 text-center">
+            <div class="w-12 h-12 rounded-xl bg-[#F1F4F9] text-muted flex items-center justify-center mx-auto mb-3"><i class="fas fa-magnifying-glass"></i></div>
+            <p class="font-medium">ไม่พบรายการที่ตรงกับการค้นหา</p>
+            <p class="text-sm text-muted mt-1">ลองพิมพ์รุ่นอื่น หรือเลือก "ทั้งหมด"</p>
           </div>`;
         return;
       }
-
-      grid.innerHTML = videos.map(v => `
-        <button type="button" data-video-id="${escapeHtml(v.id)}"
-                class="text-left bg-white rounded-[1.5rem] overflow-hidden border border-slate-100 shadow-soft card-hover group flex flex-col cursor-pointer focus:outline-none focus:ring-4 focus:ring-brand-500/20">
-          <div class="relative aspect-video w-full bg-slate-900 overflow-hidden shrink-0">
-            <div class="absolute inset-0 flex items-center justify-center text-white/20">
-              <i class="fas fa-film text-5xl"></i>
-            </div>
-            ${v.thumbnail ? `<img src="${escapeHtml(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700 ease-out" onerror="this.remove()">` : ''}
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
-            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
-              <div class="w-16 h-16 glass-play-btn rounded-full flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300 text-white pl-1 shadow-glass">
-                <i class="fas fa-play text-2xl"></i>
-              </div>
-            </div>
-            <div class="absolute top-3 right-3 z-20">
-              <span class="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm border ${getCategoryColor(v.category)} backdrop-blur-md bg-opacity-95">
-                ${escapeHtml(v.category)}
-              </span>
-            </div>
-          </div>
-          <div class="p-5 sm:p-6 flex flex-col flex-1 bg-white w-full">
-            <h3 class="font-semibold text-slate-800 line-clamp-2 leading-snug group-hover:text-brand-600 transition-colors mb-4 text-sm sm:text-base">
-              ${escapeHtml(v.title)}
-            </h3>
-            <div class="mt-auto flex items-center text-xs text-slate-500 gap-2.5">
-              <div class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-[10px] shrink-0 border border-brand-100">
-                <i class="fas fa-wrench text-[10px]"></i>
-              </div>
-              <span class="truncate font-medium">ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์</span>
-            </div>
-          </div>
-        </button>`).join('');
-    }
-
-    function loadCategories(videos) {
-      const select = $('categoryFilter');
-      const order = new Map();
-      videos.forEach(v => { if (v.category && !order.has(v.category)) order.set(v.category, v.categoryOrder ?? 9999); });
-      const categories = [...order.keys()].sort((a, b) => order.get(a) - order.get(b) || a.localeCompare(b, 'th'));
-
-      const current = select.value;
-      select.innerHTML = '';
-      select.add(new Option('ทุกหมวดหมู่', ''));
-      categories.forEach(cat => select.add(new Option(cat, cat)));
-      select.value = categories.includes(current) ? current : '';
+      grid.innerHTML = videos.map(cardHtml).join('');
     }
 
     function filterVideos() {
-      const keyword = $('searchInput').value.trim().toLowerCase();
-      const category = $('categoryFilter').value;
-      renderVideos(allVideos.filter(v =>
-        String(v.title || '').toLowerCase().includes(keyword) &&
-        (category === '' || v.category === category)
-      ));
+      const words = $('searchInput').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      renderTypePills();
+      renderVideos(allVideos.filter(v => {
+        const hay = `${v.title} ${v.category}`.toLowerCase();
+        return words.every(w => hay.includes(w)) &&
+          (!filters.category || v.category === filters.category) &&
+          (!filters.type || (v.kind || 'video') === filters.type);
+      }));
+    }
+
+    function pickCategory(e) {
+      const b = e.target.closest('[data-category]');
+      if (!b) return;
+      filters.category = b.dataset.category;
+      renderCategories();
+      filterVideos();
     }
 
     // ---------- Player ----------
@@ -493,14 +475,19 @@
       const video = allVideos.find(v => v.id === videoId);
       const overlay = $('playerOverlay');
       const wrapper = $('videoWrapper');
+      const pdf = video?.kind === 'pdf';
 
-      $('playingTitle').innerText = video ? video.title : '';
-      wrapper.innerHTML = '<div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>';
+      $('playingTitle').innerText = video ? cleanTitle(video.title) : '';
+      $('playingKind').innerText = pdf ? 'แผนผัง PDF' : 'วิดีโอ';
+      wrapper.classList.toggle('aspect-video', !pdf);
+      wrapper.classList.toggle('h-full', pdf);
+      wrapper.classList.toggle('bg-white', pdf);
+      wrapper.innerHTML = '<div class="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>';
       overlay.style.display = 'flex';
       document.body.style.overflow = 'hidden';
 
       const r = await api(`/api/videos/${encodeURIComponent(videoId)}/play`, { method: 'POST' });
-      if (overlay.style.display === 'none') return; // ผู้ใช้ปิดไปก่อนโหลดเสร็จ
+      if (overlay.style.display === 'none') return; // ปิดไปก่อนโหลดเสร็จ
       if (r.status === 401) return handleUnauthorized();
       if (!r.ok) {
         closePlayer();
@@ -510,7 +497,7 @@
 
       const iframe = document.createElement('iframe');
       iframe.src = r.data.url;
-      iframe.className = 'absolute top-0 left-0 w-full h-full border-0';
+      iframe.className = 'absolute inset-0 w-full h-full border-0';
       iframe.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
@@ -529,27 +516,32 @@
     $('logoutBtn').addEventListener('click', requestLogout);
     $('cancelLogoutBtn').addEventListener('click', closeConfirmModal);
     $('confirmLogoutBtn').addEventListener('click', executeLogout);
+    $('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmModal(); });
     $('closePlayerBtn').addEventListener('click', closePlayer);
     $('searchInput').addEventListener('input', filterVideos);
-    $('categoryFilter').addEventListener('change', filterVideos);
+    $('categoryNav').addEventListener('click', pickCategory);
+    $('categoryChips').addEventListener('click', pickCategory);
+    $('typeFilter').addEventListener('click', e => {
+      const b = e.target.closest('[data-type]');
+      if (!b) return;
+      filters.type = b.dataset.type;
+      filterVideos();
+    });
     $('videoGrid').addEventListener('click', e => {
       const card = e.target.closest('[data-video-id]');
       if (card) openPlayer(card.dataset.videoId);
     });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        if ($('playerOverlay').style.display !== 'none') closePlayer();
-        else if (!$('confirmModal').classList.contains('hidden')) closeConfirmModal();
-      }
+      if (e.key !== 'Escape') return;
+      if ($('playerOverlay').style.display !== 'none') closePlayer();
+      else if (!$('confirmModal').classList.contains('hidden')) closeConfirmModal();
     });
 
     // ---------- เริ่มต้น: ล็อกอินค้างไว้อยู่ไหม ----------
     (async function boot() {
       const r = await api('/api/me');
-      if (r.ok) {
-        $('loginPage').classList.add('hidden');
-        showMain(r.data.name, false);
-      }
+      if (r.ok) showMain(r.data.name);
+      else loadStats();
       document.body.classList.remove('booting');
       if (!r.ok) $('custCode').focus();
     })();

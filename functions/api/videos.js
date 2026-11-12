@@ -2,7 +2,7 @@ import { db } from '../../lib/supabase.js';
 import { currentCustomer } from '../../lib/auth.js';
 import { clearCookie } from '../../lib/session.js';
 import { json, fail } from '../../lib/http.js';
-import { bunnyThumbnail } from '../../lib/bunny.js';
+import { bunnyThumbnail, isDocument } from '../../lib/bunny.js';
 
 const DEFAULT_CATEGORY = 'ทั่วไป';
 
@@ -26,6 +26,7 @@ export async function onRequestGet({ request, env }) {
     title: v.title,
     description: v.description,
     category: v.category?.name || DEFAULT_CATEGORY,
+    kind: isDocument(v.title, v.category?.name) ? 'pdf' : 'video',
     categoryOrder: v.category?.sort_order ?? 9999,
     thumbnail: thumbnailOf(env, v),
   }));

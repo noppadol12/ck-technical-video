@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>หลังบ้าน · CK Technical Video</title>
   <meta name="robots" content="noindex, nofollow">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="/styles.css" rel="stylesheet">
   <style>
-    body { background-color: #f8fafc; }
+    body { background-color: #F6F8FB; font-family: 'Anuphan', system-ui, sans-serif; }
     body.booting #loginView, body.booting #appView { visibility: hidden; }
-    .tab-btn[aria-selected="true"] { background: #0f172a; color: #fff; }
+    .tab-btn[aria-selected="true"] { background: #E8EEFB; color: #1749B0; font-weight: 600; }
     .modal-panel { max-height: calc(100vh - 2rem); }
     @keyframes slideInDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     .toast-enter { animation: slideInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -29,7 +29,7 @@
   <!-- ========================= LOGIN ========================= -->
   <div id="loginView" class="min-h-screen flex items-center justify-center px-4">
     <form id="loginForm" class="bg-white w-full max-w-sm rounded-3xl shadow-soft border border-slate-100 p-8" novalidate>
-      <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-5">
+      <div class="w-14 h-14 bg-brand-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5">
         <i class="fas fa-user-shield text-xl"></i>
       </div>
       <h1 class="text-2xl font-bold text-center tracking-tight">หลังบ้าน CK Technical</h1>
@@ -38,7 +38,7 @@
       <input id="loginEmail" type="email" autocomplete="username" required class="w-full mb-4 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
       <label class="block text-sm font-medium mb-1.5" for="loginPassword">รหัสผ่าน</label>
       <input id="loginPassword" type="password" autocomplete="current-password" required class="w-full mb-6 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
-      <button id="loginBtn" type="submit" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium transition-colors btn-press">เข้าสู่ระบบ</button>
+      <button id="loginBtn" type="submit" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium transition-colors btn-press">เข้าสู่ระบบ</button>
     </form>
   </div>
 
@@ -47,7 +47,7 @@
     <header class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-30">
       <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="bg-gradient-to-tr from-brand-600 to-brand-400 text-white w-9 h-9 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-play text-sm ml-0.5"></i></div>
+          <div class="bg-brand-600 text-white w-9 h-9 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-play text-sm ml-0.5"></i></div>
           <div class="min-w-0">
             <div class="font-bold tracking-tight leading-tight">CK Technical · หลังบ้าน</div>
             <div class="text-xs text-slate-500 truncate"><span id="adminName"></span> · <span id="adminRole"></span></div>
@@ -105,7 +105,7 @@
             <option value="expired">หมดอายุ</option>
             <option value="disabled">ปิดสิทธิ์</option>
           </select>
-          <button data-action="customer-new" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มลูกค้า</button>
+          <button data-action="customer-new" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มลูกค้า</button>
         </div>
         <p id="customerCount" class="text-sm text-slate-500 mb-3"></p>
         <div id="customerList" class="space-y-3"></div>
@@ -129,7 +129,7 @@
             <input id="videoSearch" type="search" placeholder="ค้นหาชื่อวิดีโอ" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
           </div>
           <select id="videoCategory" class="px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium"></select>
-          <button data-action="video-new" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มวิดีโอ</button>
+          <button data-action="video-new" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มวิดีโอ</button>
         </div>
         <p id="videoCount" class="text-sm text-slate-500 mb-3"></p>
         <div id="videoList" class="space-y-3"></div>
@@ -139,7 +139,7 @@
       <section data-panel="categories" class="hidden max-w-2xl">
         <form id="categoryForm" class="flex gap-3 mb-4">
           <input id="categoryName" maxlength="80" placeholder="ชื่อหมวดใหม่" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
-          <button class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มหมวด</button>
+          <button class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มหมวด</button>
         </form>
         <p class="text-sm text-slate-500 mb-3">ลำดับที่นี่คือลำดับในตัวกรองหมวดหมู่ของหน้าลูกค้า</p>
         <div id="categoryList" class="bg-white rounded-2xl border border-slate-100 shadow-soft divide-y divide-slate-100"></div>
@@ -157,7 +157,7 @@
             <label class="text-sm">ตั้งแต่<input id="reportFrom" type="date" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-slate-200"></label>
             <label class="text-sm">ถึง<input id="reportTo" type="date" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-slate-200"></label>
             <label class="text-sm col-span-2 md:col-span-1">ค้นหา<input id="reportQuery" type="search" placeholder="รหัส ชื่อ วิดีโอ" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-slate-200"></label>
-            <button class="py-2.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press"><i class="fas fa-search mr-1.5"></i>แสดง</button>
+            <button class="py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-search mr-1.5"></i>แสดง</button>
             <a id="reportCsv" href="#" class="py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-center"><i class="fas fa-file-excel mr-1.5"></i>ดาวน์โหลด Excel</a>
           </form>
         </div>
@@ -288,7 +288,7 @@
         <p class="text-slate-600 mb-6">${message}</p>
         <div class="flex gap-3">
           <button data-c="no" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 font-medium">ยกเลิก</button>
-          <button data-c="yes" class="flex-1 py-3 rounded-xl ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-900 hover:bg-brand-600'} text-white font-medium">${esc(okText)}</button>
+          <button data-c="yes" class="flex-1 py-3 rounded-xl ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-600 hover:bg-brand-700'} text-white font-medium">${esc(okText)}</button>
         </div>`);
       $('modalBody').querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => {
         closeModal();
@@ -467,7 +467,7 @@
             </div>
             <div class="text-xs text-slate-500 mt-2">สร้างเมื่อ ${fmtDate(c.created_at)} · เข้าล่าสุด ${timeAgo(c.last_login_at)}</div>
           </div>`}
-        <button id="customerSave" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press">${isNew ? 'เพิ่มลูกค้า' : 'บันทึก'}</button>
+        <button id="customerSave" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press">${isNew ? 'เพิ่มลูกค้า' : 'บันทึก'}</button>
       </form>`);
 
     $('customerForm').addEventListener('submit', async e => {
@@ -713,7 +713,7 @@
           <button type="button" data-mode="drive" class="mode-btn py-2 rounded-lg text-sm font-medium"><i class="fab fa-google-drive mr-1.5"></i>ลิงก์ Google Drive</button>
         </div>
         <div id="uploadWrap">
-          ${field('ไฟล์วิดีโอ <span class="text-red-500">*</span>', `<input name="file" type="file" accept="video/*" class="${inputCls} file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-900 file:text-white">`, 'อัปโหลดตรงไป Bunny · ไฟล์ใหญ่ได้ · เน็ตหลุดอัปต่อได้ · ห้ามปิดหน้านี้ระหว่างอัปโหลด')}
+          ${field('ไฟล์วิดีโอ <span class="text-red-500">*</span>', `<input name="file" type="file" accept="video/*" class="${inputCls} file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-brand-600 file:text-white">`, 'อัปโหลดตรงไป Bunny · ไฟล์ใหญ่ได้ · เน็ตหลุดอัปต่อได้ · ห้ามปิดหน้านี้ระหว่างอัปโหลด')}
           <div id="uploadBar" class="hidden mb-4"><div class="flex justify-between text-sm mb-1"><span>กำลังอัปโหลด</span><span id="uploadPct">0%</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div id="uploadFill" class="h-full bg-brand-600 rounded-full transition-all" style="width:0%"></div></div></div>
         </div>` : ''}
         <div id="driveWrap" class="${isNew || onBunny ? 'hidden' : ''}">
@@ -730,7 +730,7 @@
           <input name="is_published" type="checkbox" class="w-5 h-5 accent-blue-600" ${!v || v.is_published ? 'checked' : ''}>
           <span class="text-sm font-medium">แสดงให้ลูกค้าเห็น</span>
         </label>
-        <button id="videoSave" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium btn-press">${isNew ? 'เพิ่มวิดีโอ' : 'บันทึก'}</button>
+        <button id="videoSave" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press">${isNew ? 'เพิ่มวิดีโอ' : 'บันทึก'}</button>
       </form>`);
 
     const form = $('videoForm');
@@ -875,7 +875,7 @@
   function renameCategory(c) {
     openModal('เปลี่ยนชื่อหมวด', `
       <form id="catForm">${field('ชื่อหมวด', `<input name="name" maxlength="80" required class="${inputCls}" value="${esc(c.name)}">`)}
-      <button id="catSave" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-medium">บันทึก</button></form>`);
+      <button id="catSave" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium">บันทึก</button></form>`);
     $('catForm').addEventListener('submit', async e => {
       e.preventDefault();
       const r = await api(`/api/admin/categories/${c.id}`, { method: 'PATCH', body: { name: e.target.elements.namedItem('name').value } });
@@ -922,7 +922,7 @@
     if (!$('reportFrom').value && !e) $('reportFrom').value = daysAgoInput(30);
     document.querySelectorAll('.report-type').forEach(b => {
       const on = b.dataset.type === state.reportType;
-      b.className = `report-type px-4 py-2 rounded-xl text-sm font-medium ${on ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+      b.className = `report-type px-4 py-2 rounded-xl text-sm font-medium ${on ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
     });
     const isActions = state.reportType === 'actions';
     $('reportForm').classList.toggle('hidden', isActions);

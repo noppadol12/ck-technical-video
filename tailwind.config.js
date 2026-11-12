@@ -3,9 +3,10 @@ module.exports = {
   content: ['./public/**/*.html'],
   theme: {
     extend: {
-      fontFamily: { sans: ['Prompt', 'sans-serif'] },
+      fontFamily: { sans: ['Anuphan', 'system-ui', 'sans-serif'] },
       colors: {
-        brand: { 50: '#f0f5ff', 100: '#e5edff', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+        brand: { 50: '#EEF3FD', 100: '#E8EEFB', 400: '#5B8BEA', 500: '#2F6BE0', 600: '#1F5BD8', 700: '#1749B0', 900: '#0F2E73' },
+        ink: '#0F172A', muted: '#5B6474', line: '#E4E8EF', canvas: '#F6F8FB', pdf: { bg: '#FFF4E8', fg: '#9A4A07', line: '#F3D9BE' },
       },
       boxShadow: {
         soft: '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
