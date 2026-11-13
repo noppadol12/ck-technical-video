@@ -161,7 +161,10 @@
             <a id="reportCsv" href="#" class="py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-center"><i class="fas fa-file-excel mr-1.5"></i>ดาวน์โหลด Excel</a>
           </form>
         </div>
-        <p id="reportCount" class="text-sm text-slate-500 mb-3"></p>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <p id="reportCount" class="text-sm text-slate-500"></p>
+          <button id="reportPurge" type="button" class="hidden px-4 py-2 rounded-xl text-sm font-medium border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"><i class="fas fa-trash mr-1.5"></i>ลบรายการตามตัวกรองนี้</button>
+        </div>
         <div class="bg-white rounded-2xl border border-slate-100 shadow-soft overflow-x-auto">
           <table class="w-full text-sm">
             <thead id="reportHead" class="bg-slate-50 text-slate-500 text-left"></thead>
@@ -905,6 +908,7 @@
   const ACTION_TEXT = {
     'admin.login': 'เข้าสู่หลังบ้าน', 'customer.create': 'เพิ่มลูกค้า', 'customer.update': 'แก้ไขลูกค้า', 'customer.reset_sessions': 'เตะลูกค้าออกทุกเครื่อง',
     'video.create': 'เพิ่มวิดีโอ', 'video.upload': 'อัปโหลดวิดีโอ', 'video.migrate': 'ย้ายวิดีโอไป Bunny', 'video.update': 'แก้ไขวิดีโอ', 'video.delete': 'ลบวิดีโอ', 'video.reorder': 'เรียงลำดับวิดีโอ',
+    'logs.purge': 'ลบประวัติการเข้าชม',
     'category.create': 'เพิ่มหมวด', 'category.update': 'แก้ไขหมวด', 'category.delete': 'ลบหมวด', 'category.reorder': 'เรียงลำดับหมวด',
   };
 
@@ -926,6 +930,7 @@
     });
     const isActions = state.reportType === 'actions';
     $('reportForm').classList.toggle('hidden', isActions);
+    $('reportPurge').classList.add('hidden');
     $('reportCsv').href = `/api/admin/reports/logs?${reportParams('csv')}`;
     $('reportBody').innerHTML = `<tr><td colspan="5">${loading()}</td></tr>`;
 
@@ -944,10 +949,13 @@
     }
 
     const watch = state.reportType === 'watch';
-    $('reportHead').innerHTML = `<tr><th class="px-4 py-3 font-medium">วันเวลา</th><th class="px-4 py-3 font-medium">รหัส</th><th class="px-4 py-3 font-medium">ลูกค้า</th><th class="px-4 py-3 font-medium">${watch ? 'วิดีโอ' : 'อุปกรณ์'}</th></tr>`;
+    const owner = isOwner();
+    $('reportHead').innerHTML = `<tr><th class="px-4 py-3 font-medium">วันเวลา</th><th class="px-4 py-3 font-medium">รหัส</th><th class="px-4 py-3 font-medium">ลูกค้า</th><th class="px-4 py-3 font-medium">${watch ? 'วิดีโอ' : 'อุปกรณ์'}</th>${owner ? '<th class="w-12"></th>' : ''}</tr>`;
     const r = await api(`/api/admin/reports/logs?${reportParams()}`);
     if (!r.ok) { $('reportBody').innerHTML = `<tr><td colspan="4">${empty(errorText(r))}</td></tr>`; return; }
     const rows = r.data.rows;
+    state.reportRows = rows;
+    $('reportPurge').classList.toggle('hidden', !owner || rows.length === 0);
     $('reportCount').textContent = `${rows.length.toLocaleString('th-TH')} รายการ${r.data.truncated ? ' (แสดงสูงสุด 5,000 รายการล่าสุด กรุณาแคบช่วงวันที่)' : ''}`;
     const device = ua => !ua ? '—' : /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : /Mac OS/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'อื่นๆ';
     $('reportBody').innerHTML = rows.map(x => `<tr>
@@ -955,10 +963,45 @@
       <td class="px-4 py-2.5 font-mono text-xs whitespace-nowrap">${esc(x.code_snapshot)}</td>
       <td class="px-4 py-2.5">${esc(x.name_snapshot || '—')}</td>
       <td class="px-4 py-2.5">${watch ? esc(x.video_title_snapshot || '—') : esc(device(x.user_agent))}</td>
+      ${owner ? `<td class="px-2 py-1.5 text-right"><button data-log-id="${Number(x.id)}" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600" title="ลบรายการนี้"><i class="fas fa-trash text-xs"></i></button></td>` : ''}
     </tr>`).join('') || `<tr><td colspan="4">${empty('ไม่มีข้อมูลในช่วงนี้')}</td></tr>`;
   }
 
+  const LOG_LABEL = { watch: 'ประวัติการดูวิดีโอ', login: 'ประวัติการเข้าระบบ' };
+
+  async function purgeLogs(payload, summary) {
+    const r = await api('/api/admin/reports/purge', { method: 'POST', body: { type: state.reportType, ...payload } });
+    if (!r.ok) return toast(r.status === 403 ? 'เฉพาะเจ้าของระบบเท่านั้นที่ลบได้' : errorText(r), 'err');
+    toast(`ลบ${summary}แล้ว ${r.data.deleted.toLocaleString('th-TH')} รายการ`);
+    loadReport({ preventDefault() {} });
+  }
+
+  async function purgeFiltered() {
+    const filter = { from: $('reportFrom').value || undefined, to: $('reportTo').value || undefined, q: $('reportQuery').value.trim() || undefined };
+    const r = await api('/api/admin/reports/purge', { method: 'POST', body: { type: state.reportType, ...filter, dry_run: true } });
+    if (!r.ok) return toast(errorText(r), 'err');
+    const n = r.data.count;
+    if (!n) return toast('ไม่มีรายการให้ลบ', 'err');
+    const range = [filter.from ? `ตั้งแต่ ${esc(filter.from)}` : 'ตั้งแต่เริ่มต้น', filter.to ? `ถึง ${esc(filter.to)}` : 'ถึงปัจจุบัน'].join(' ');
+    const ok = await confirmBox(`ลบ${LOG_LABEL[state.reportType]}`, `
+      ลบ <b>${n.toLocaleString('th-TH')} รายการ</b> ${range}${filter.q ? ` ที่ตรงกับ “${esc(filter.q)}”` : ''}<br>
+      ลบแล้วกู้คืนไม่ได้ ตัวเลขสถิติในหน้าภาพรวมจะลดลงตามไปด้วย<br>
+      <span class="text-xs text-slate-500">ถ้าต้องการเก็บไว้ ให้กด “ดาวน์โหลด Excel” ก่อน</span>`, `ลบ ${n.toLocaleString('th-TH')} รายการ`);
+    if (ok) purgeLogs(filter, LOG_LABEL[state.reportType]);
+  }
+
+  async function purgeOne(id) {
+    const x = (state.reportRows || []).find(r => Number(r.id) === id);
+    const what = x ? `${esc(x.name_snapshot || x.code_snapshot)} · ${fmtDateTime(x.created_at)}${x.video_title_snapshot ? `<br>${esc(x.video_title_snapshot)}` : ''}` : '';
+    if (await confirmBox('ลบรายการนี้', `${what}<br><span class="text-xs text-slate-500">ลบแล้วกู้คืนไม่ได้</span>`, 'ลบ')) purgeLogs({ ids: [id] }, 'รายการ');
+  }
+
   // ---------------------------------------------------------------- events
+  $('reportPurge').addEventListener('click', purgeFiltered);
+  $('reportBody').addEventListener('click', e => {
+    const b = e.target.closest('[data-log-id]');
+    if (b) purgeOne(Number(b.dataset.logId));
+  });
   $('loginForm').addEventListener('submit', login);
   $('logoutBtn').addEventListener('click', logout);
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));

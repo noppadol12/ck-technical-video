@@ -12,6 +12,22 @@ function dayBoundary(v, field, endOfDay) {
   return new Date(t).toISOString();
 }
 
+export const LOG_TABLES = {
+  watch: { table: 'watch_logs', search: ['code_snapshot', 'name_snapshot', 'video_title_snapshot'] },
+  login: { table: 'login_logs', search: ['code_snapshot', 'name_snapshot'] },
+};
+
+// ตัวกรองเดียวกันทั้งการแสดง/ดาวน์โหลด/ลบ — ลบได้ตรงกับที่เห็นในตาราง
+export function logFilter(type, { from, to, q: term } = {}) {
+  const f = [];
+  const a = dayBoundary(from, 'from', false);
+  const b = dayBoundary(to, 'to', true);
+  if (a) f.push(`created_at=gte.${q(a)}`);
+  if (b) f.push(`created_at=lte.${q(b)}`);
+  const s = ilikeAny(LOG_TABLES[type].search, term || '');
+  return f.map(x => '&' + x).join('') + s;
+}
+
 const bkk = iso => new Date(new Date(iso).getTime() + 7 * 3600e3).toISOString().slice(0, 19).replace('T', ' ');
 const csvCell = v => {
   const s = v == null ? '' : String(v);
@@ -23,20 +39,14 @@ const csvCell = v => {
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const type = url.searchParams.get('type') === 'login' ? 'login' : 'watch';
-  const from = dayBoundary(url.searchParams.get('from'), 'from', false);
-  const to = dayBoundary(url.searchParams.get('to'), 'to', true);
-  const term = url.searchParams.get('q') || '';
-
-  const table = type === 'login' ? 'login_logs' : 'watch_logs';
+  const { table } = LOG_TABLES[type];
   const cols = type === 'login'
-    ? 'created_at,code_snapshot,name_snapshot,ip,user_agent,legacy'
-    : 'created_at,code_snapshot,name_snapshot,video_title_snapshot,legacy';
-  const searchCols = type === 'login' ? ['code_snapshot', 'name_snapshot'] : ['code_snapshot', 'name_snapshot', 'video_title_snapshot'];
+    ? 'id,created_at,code_snapshot,name_snapshot,ip,user_agent,legacy'
+    : 'id,created_at,code_snapshot,name_snapshot,video_title_snapshot,legacy';
 
-  let path = `${table}?select=${cols}&order=created_at.desc&limit=${LIMIT}`;
-  if (from) path += `&created_at=gte.${q(from)}`;
-  if (to) path += `&created_at=lte.${q(to)}`;
-  path += ilikeAny(searchCols, term);
+  const path = `${table}?select=${cols}&order=created_at.desc&limit=${LIMIT}` + logFilter(type, {
+    from: url.searchParams.get('from'), to: url.searchParams.get('to'), q: url.searchParams.get('q'),
+  });
 
   const rows = await db(env).select(path);
 
