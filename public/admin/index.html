@@ -2,21 +2,46 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFFFF">
   <title>หลังบ้าน · CK Technical Video</title>
   <meta name="robots" content="noindex, nofollow">
   <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="/styles.css" rel="stylesheet">
   <style>
-    body { background-color: #F6F8FB; font-family: 'Anuphan', system-ui, sans-serif; }
+    body { overflow-x: clip; background-color: #F6F8FB; font-family: 'Anuphan', system-ui, sans-serif; }
     body.booting #loginView, body.booting #appView { visibility: hidden; }
-    .tab-btn[aria-selected="true"] { background: #E8EEFB; color: #1749B0; font-weight: 600; }
+    .tab-btn:not(.bnav-btn)[aria-selected="true"] { background: #E8EEFB; color: #1749B0; font-weight: 600; }
     .modal-panel { max-height: calc(100vh - 2rem); }
     @keyframes slideInDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     .toast-enter { animation: slideInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     .btn-press:active { transform: scale(0.97); }
     input[type="date"]::-webkit-calendar-picker-indicator { opacity: .6; cursor: pointer; }
+    html { -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { scrollbar-width: none; }
+    /* แถบเมนูล่าง (มือถือ) */
+    .bnav-btn[aria-selected="true"] { color: #1F5BD8; }
+    .bnav-btn[aria-selected="true"] .bnav-ico { background: #E8EEFB; }
+    @media (max-width: 639px) {
+      /* iOS ซูมหน้าเองถ้าตัวอักษรในช่องกรอก < 16px */
+      input, select, textarea { font-size: 16px !important; }
+      .modal-panel { max-height: calc(100dvh - 1rem); padding-bottom: env(safe-area-inset-bottom); }
+      /* ตารางรายงาน → การ์ด */
+      #reportTable thead { display: none; }
+      #reportTable tbody { display: block; }
+      #reportTable tr { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "name act" "code act" "what what" "time time"; gap: 2px 8px; padding: 12px 14px; }
+      #reportTable td { padding: 0 !important; white-space: normal !important; }
+      #reportTable td.c-time { grid-area: time; font-size: 12px; }
+      #reportTable td.c-code { grid-area: code; }
+      #reportTable td.c-name { grid-area: name; font-weight: 600; }
+      #reportTable td.c-what { grid-area: what; color: #3A4352; }
+      #reportTable td.c-act { grid-area: act; align-self: center; }
+      #reportTable td.c-full { grid-column: 1 / -1; }
+      #reportTable td[colspan] { grid-column: 1 / -1; }
+    }
+    .pb-nav { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+    @media (min-width: 640px) { .pb-nav { padding-bottom: 1.5rem; } }
   </style>
 </head>
 <body class="booting text-slate-800 antialiased min-h-screen">
@@ -54,11 +79,11 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <a href="/" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-100"><i class="fas fa-up-right-from-square text-xs"></i> หน้าลูกค้า</a>
+          <a href="/" target="_blank" rel="noopener" title="หน้าลูกค้า" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-100"><i class="fas fa-up-right-from-square text-xs"></i><span class="hidden sm:inline"> หน้าลูกค้า</span></a>
           <button id="logoutBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-red-50 hover:text-red-600 btn-press"><i class="fas fa-sign-out-alt"></i><span class="hidden sm:inline">ออกจากระบบ</span></button>
         </div>
       </div>
-      <nav class="max-w-6xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto" role="tablist">
+      <nav class="hidden sm:flex max-w-6xl mx-auto px-4 pb-3 gap-2 overflow-x-auto" role="tablist">
         <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="dashboard"><i class="fas fa-chart-simple mr-1.5"></i>ภาพรวม</button>
         <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="customers"><i class="fas fa-users mr-1.5"></i>ลูกค้า</button>
         <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="videos"><i class="fas fa-film mr-1.5"></i>วิดีโอ</button>
@@ -67,12 +92,12 @@
       </nav>
     </header>
 
-    <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1">
+    <main class="max-w-6xl mx-auto w-full px-4 pt-4 sm:pt-6 pb-nav flex-1">
 
       <!-- Dashboard -->
       <section data-panel="dashboard" class="hidden space-y-6">
-        <div id="statCards" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
-        <div class="grid lg:grid-cols-2 gap-6">
+        <div id="statCards" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-5">
             <h2 class="font-semibold mb-4">วิดีโอยอดนิยม 30 วันล่าสุด</h2>
             <div id="topVideos" class="space-y-3"></div>
@@ -94,18 +119,18 @@
 
       <!-- Customers -->
       <section data-panel="customers" class="hidden">
-        <div class="flex flex-col sm:flex-row gap-3 mb-4">
-          <div class="relative flex-1">
+        <div class="flex gap-2 sm:gap-3 mb-4">
+          <div class="relative flex-1 min-w-0">
             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input id="customerSearch" type="search" placeholder="ค้นหารหัส ชื่อ เบอร์ บริษัท" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
+            <input id="customerSearch" type="search" placeholder="รหัส ชื่อ เบอร์ บริษัท" class="w-full pl-11 pr-3 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
           </div>
-          <select id="customerStatus" class="px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium">
+          <select id="customerStatus" class="w-[118px] sm:w-auto shrink-0 px-3 sm:px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium">
             <option value="">ทุกสถานะ</option>
             <option value="active">ใช้งานได้</option>
             <option value="expired">หมดอายุ</option>
             <option value="disabled">ปิดสิทธิ์</option>
           </select>
-          <button data-action="customer-new" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มลูกค้า</button>
+          <button data-action="customer-new" class="hidden sm:block shrink-0 px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มลูกค้า</button>
         </div>
         <p id="customerCount" class="text-sm text-slate-500 mb-3"></p>
         <div id="customerList" class="space-y-3"></div>
@@ -123,13 +148,13 @@
             <button data-action="migrate-all" id="migrateAllBtn" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press disabled:opacity-50"></button>
           </div>
         </div>
-        <div class="flex flex-col sm:flex-row gap-3 mb-4">
-          <div class="relative flex-1">
+        <div class="flex gap-2 sm:gap-3 mb-4">
+          <div class="relative flex-1 min-w-0">
             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input id="videoSearch" type="search" placeholder="ค้นหาชื่อวิดีโอ" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
+            <input id="videoSearch" type="search" placeholder="ชื่อวิดีโอ" class="w-full pl-11 pr-3 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500">
           </div>
-          <select id="videoCategory" class="px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium"></select>
-          <button data-action="video-new" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มวิดีโอ</button>
+          <select id="videoCategory" class="w-[130px] sm:w-auto shrink-0 px-3 sm:px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium"></select>
+          <button data-action="video-new" class="hidden sm:block shrink-0 px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มวิดีโอ</button>
         </div>
         <p id="videoCount" class="text-sm text-slate-500 mb-3"></p>
         <div id="videoList" class="space-y-3"></div>
@@ -148,10 +173,10 @@
       <!-- Reports -->
       <section data-panel="reports" class="hidden">
         <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-4 mb-4">
-          <div class="flex flex-wrap gap-2 mb-4" role="radiogroup">
+          <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap" role="radiogroup">
             <button class="report-type px-4 py-2 rounded-xl text-sm font-medium" data-type="watch">การดูวิดีโอ</button>
             <button class="report-type px-4 py-2 rounded-xl text-sm font-medium" data-type="login">การเข้าระบบ</button>
-            <button class="report-type px-4 py-2 rounded-xl text-sm font-medium" data-type="actions">ประวัติการแก้ไขของแอดมิน</button>
+            <button class="report-type px-4 py-2 rounded-xl text-sm font-medium" data-type="actions">ประวัติแอดมิน</button>
           </div>
           <form id="reportForm" class="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
             <label class="text-sm">ตั้งแต่<input id="reportFrom" type="date" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-slate-200"></label>
@@ -166,13 +191,25 @@
           <button id="reportPurge" type="button" class="hidden px-4 py-2 rounded-xl text-sm font-medium border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"><i class="fas fa-trash mr-1.5"></i>ลบรายการตามตัวกรองนี้</button>
         </div>
         <div class="bg-white rounded-2xl border border-slate-100 shadow-soft overflow-x-auto">
-          <table class="w-full text-sm">
+          <table id="reportTable" class="w-full text-sm">
             <thead id="reportHead" class="bg-slate-50 text-slate-500 text-left"></thead>
             <tbody id="reportBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </section>
     </main>
+
+    <!-- มือถือ: ปุ่มเพิ่มลอย -->
+    <button id="fab" data-action="customer-new" aria-label="เพิ่ม" class="sm:hidden hidden fixed right-4 z-30 w-14 h-14 rounded-2xl bg-brand-600 active:bg-brand-700 text-white shadow-lg shadow-brand-600/30 items-center justify-center btn-press" style="bottom:calc(5rem + env(safe-area-inset-bottom))"><i class="fas fa-plus text-lg"></i></button>
+
+    <!-- มือถือ: เมนูล่าง -->
+    <nav id="bottomNav" class="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-slate-200 grid grid-cols-5" style="padding-bottom:env(safe-area-inset-bottom)" role="tablist">
+      <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="dashboard"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-chart-simple"></i></span>ภาพรวม</button>
+      <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="customers"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-users"></i></span>ลูกค้า</button>
+      <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="videos"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-film"></i></span>วิดีโอ</button>
+      <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="categories"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-layer-group"></i></span>หมวดหมู่</button>
+      <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="reports"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-file-lines"></i></span>รายงาน</button>
+    </nav>
   </div>
 
   <!-- ========================= MODAL ========================= -->
@@ -354,6 +391,10 @@
     if (location.hash.slice(1) !== tab) history.replaceState(null, '', `#${tab}`);
     document.querySelectorAll('.tab-btn').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
     document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== tab));
+    const fabAction = { customers: 'customer-new', videos: 'video-new' }[tab];
+    $('fab').classList.toggle('hidden', !fabAction); $('fab').classList.toggle('flex', !!fabAction);
+    if (fabAction) $('fab').dataset.action = fabAction;
+    window.scrollTo(0, 0);
     LOADERS[tab]();
   }
 
@@ -379,7 +420,7 @@
     const max = Math.max(1, ...s.top_videos_30d.map(t => t.views));
     $('topVideos').innerHTML = s.top_videos_30d.length ? s.top_videos_30d.map((t, i) => `
       <div>
-        <div class="flex justify-between gap-3 text-sm mb-1"><span class="truncate"><span class="text-slate-400 mr-1.5">${i + 1}.</span>${esc(t.title)}</span><span class="shrink-0 font-semibold">${t.views} <span class="font-normal text-slate-400">ครั้ง · ${t.viewers} คน</span></span></div>
+        <div class="flex justify-between gap-3 text-sm mb-1"><span class="truncate min-w-0"><span class="text-slate-400 mr-1.5">${i + 1}.</span>${esc(t.title)}</span><span class="shrink-0 font-semibold">${t.views} <span class="font-normal text-slate-400">ครั้ง · ${t.viewers} คน</span></span></div>
         <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-brand-500 rounded-full" style="width:${(t.views / max) * 100}%"></div></div>
       </div>`).join('') : empty('ยังไม่มีการดูใน 30 วันที่ผ่านมา', 'fa-chart-simple');
 
@@ -412,9 +453,9 @@
             <span class="font-semibold">${esc(c.name)}</span>${STATE_BADGE[c.state]}
           </div>
           <div class="text-sm text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
-            <span class="font-mono text-slate-700">${esc(c.code)}</span>
+            <button data-action="customer-copy" data-id="${esc(c.id)}" class="font-mono text-slate-700 hover:text-brand-600" title="แตะเพื่อคัดลอก">${esc(c.code)}</button>
             ${c.company ? `<span><i class="fas fa-building mr-1 text-slate-400"></i>${esc(c.company)}</span>` : ''}
-            ${c.phone ? `<span><i class="fas fa-phone mr-1 text-slate-400"></i>${esc(c.phone)}</span>` : ''}
+            ${c.phone ? `<a href="tel:${esc(String(c.phone).replace(/[^0-9+]/g, ''))}" class="hover:text-brand-600"><i class="fas fa-phone mr-1 text-slate-400"></i>${esc(c.phone)}</a>` : ''}
           </div>
           <div class="text-xs text-slate-400 mt-1.5 flex flex-wrap gap-x-4">
             <span>หมดอายุ ${c.expires_at ? fmtDate(c.expires_at) : 'ไม่มีกำหนด'}</span>
@@ -422,8 +463,8 @@
             <span>ดูวิดีโอ ${c.total_views} ครั้ง</span>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2 shrink-0">
-          <button data-action="customer-copy" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-brand-100 text-brand-700 hover:bg-brand-50 font-medium" title="คัดลอกรหัสลูกค้า"><i class="far fa-copy mr-1"></i>คัดลอกรหัส</button>
+        <div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 shrink-0">
+          <button data-action="customer-copy" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-brand-100 text-brand-700 hover:bg-brand-50 font-medium" title="คัดลอกรหัสลูกค้า"><i class="far fa-copy mr-1"></i>คัดลอก<span class="hidden sm:inline">รหัส</span></button>
           <button data-action="customer-edit" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200 font-medium"><i class="fas fa-pen mr-1"></i>แก้ไข</button>
           <button data-action="customer-toggle" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm font-medium ${c.active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}">${c.active ? '<i class="fas fa-ban mr-1"></i>ปิดสิทธิ์' : '<i class="fas fa-check mr-1"></i>เปิดสิทธิ์'}</button>
         </div>
@@ -551,13 +592,13 @@
       (!cat || (cat === 'none' ? v.category_id == null : String(v.category_id) === cat)));
     $('videoCount').textContent = `${list.length} จาก ${state.videos.length} เรื่อง · แสดงอยู่ ${state.videos.filter(v => v.is_published).length}` + (filtered ? ' · ล้างตัวกรองเพื่อเลื่อนลำดับ' : '');
     $('videoList').innerHTML = list.length ? list.map(v => `
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-3 flex items-center gap-3 ${v.is_published ? '' : 'opacity-60'}">
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-3 flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-2 ${v.is_published ? '' : 'opacity-60'}">
         ${filtered ? '' : `
         <div class="flex flex-col shrink-0">
           <button data-action="video-up" data-id="${esc(v.id)}" class="w-8 h-7 rounded-lg hover:bg-slate-100 text-slate-400" aria-label="เลื่อนขึ้น"><i class="fas fa-chevron-up text-xs"></i></button>
           <button data-action="video-down" data-id="${esc(v.id)}" class="w-8 h-7 rounded-lg hover:bg-slate-100 text-slate-400" aria-label="เลื่อนลง"><i class="fas fa-chevron-down text-xs"></i></button>
         </div>`}
-        <div class="w-24 sm:w-32 aspect-video rounded-xl bg-slate-900 overflow-hidden shrink-0 relative">
+        <div class="w-24 sm:w-32 aspect-video rounded-lg sm:rounded-xl bg-slate-900 overflow-hidden shrink-0 relative">
           <i class="fas fa-film absolute inset-0 m-auto w-fit h-fit text-white/20 text-xl"></i>
           ${v.thumbnail ? `<img src="${esc(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">` : ''}
         </div>
@@ -571,7 +612,7 @@
           </div>
           ${v.bunny_status === 'failed' && v.bunny_error ? `<div class="text-xs text-red-600 mt-1">${esc(v.bunny_error)}</div>` : ''}
         </div>
-        <div class="flex flex-col sm:flex-row gap-1.5 shrink-0">
+        <div class="flex gap-1 sm:gap-1.5 shrink-0 w-full sm:w-auto justify-end border-t border-slate-100 pt-2 sm:border-0 sm:pt-0">
           ${v.bunny_status === 'failed' && v.source === 'drive' && !v.is_document ? `<button data-action="video-migrate" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-brand-50 text-brand-600" title="ลองย้ายไป Bunny อีกครั้ง"><i class="fas fa-rotate-right"></i></button>` : ''}
           <button data-action="video-publish" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="${v.is_published ? 'ซ่อนจากลูกค้า' : 'แสดงให้ลูกค้า'}"><i class="fas ${v.is_published ? 'fa-eye' : 'fa-eye-slash'}"></i></button>
           <button data-action="video-edit" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="แก้ไข"><i class="fas fa-pen"></i></button>
@@ -926,7 +967,7 @@
     if (!$('reportFrom').value && !e) $('reportFrom').value = daysAgoInput(30);
     document.querySelectorAll('.report-type').forEach(b => {
       const on = b.dataset.type === state.reportType;
-      b.className = `report-type px-4 py-2 rounded-xl text-sm font-medium ${on ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+      b.className = `report-type shrink-0 whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium ${on ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
     });
     const isActions = state.reportType === 'actions';
     $('reportForm').classList.toggle('hidden', isActions);
@@ -940,10 +981,10 @@
       if (!r.ok) { $('reportBody').innerHTML = `<tr><td colspan="4">${empty(errorText(r))}</td></tr>`; return; }
       $('reportCount').textContent = `${r.data.actions.length} รายการล่าสุด`;
       $('reportBody').innerHTML = r.data.actions.map(a => `<tr>
-        <td class="px-4 py-2.5 whitespace-nowrap text-slate-500">${fmtDateTime(a.created_at)}</td>
-        <td class="px-4 py-2.5">${esc(a.admin || '—')}</td>
-        <td class="px-4 py-2.5 whitespace-nowrap">${esc(ACTION_TEXT[a.action] || a.action)}</td>
-        <td class="px-4 py-2.5 text-slate-500 text-xs max-w-md truncate">${esc(a.detail ? Object.entries(a.detail).map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' · ') : '')}</td>
+        <td class="c-time px-4 py-2.5 whitespace-nowrap text-slate-500">${fmtDateTime(a.created_at)}</td>
+        <td class="c-code px-4 py-2.5">${esc(a.admin || '—')}</td>
+        <td class="c-name px-4 py-2.5 whitespace-nowrap">${esc(ACTION_TEXT[a.action] || a.action)}</td>
+        <td class="c-what px-4 py-2.5 text-slate-500 text-xs max-w-md truncate">${esc(a.detail ? Object.entries(a.detail).map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' · ') : '')}</td>
       </tr>`).join('') || `<tr><td colspan="4">${empty('ยังไม่มีประวัติ')}</td></tr>`;
       return;
     }
@@ -959,11 +1000,11 @@
     $('reportCount').textContent = `${rows.length.toLocaleString('th-TH')} รายการ${r.data.truncated ? ' (แสดงสูงสุด 5,000 รายการล่าสุด กรุณาแคบช่วงวันที่)' : ''}`;
     const device = ua => !ua ? '—' : /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : /Mac OS/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'อื่นๆ';
     $('reportBody').innerHTML = rows.map(x => `<tr>
-      <td class="px-4 py-2.5 whitespace-nowrap text-slate-500">${fmtDateTime(x.created_at)}</td>
-      <td class="px-4 py-2.5 font-mono text-xs whitespace-nowrap">${esc(x.code_snapshot)}</td>
-      <td class="px-4 py-2.5">${esc(x.name_snapshot || '—')}</td>
-      <td class="px-4 py-2.5">${watch ? esc(x.video_title_snapshot || '—') : esc(device(x.user_agent))}</td>
-      ${owner ? `<td class="px-2 py-1.5 text-right"><button data-log-id="${Number(x.id)}" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600" title="ลบรายการนี้"><i class="fas fa-trash text-xs"></i></button></td>` : ''}
+      <td class="c-time px-4 py-2.5 whitespace-nowrap text-slate-500">${fmtDateTime(x.created_at)}</td>
+      <td class="c-code px-4 py-2.5 font-mono text-xs whitespace-nowrap">${esc(x.code_snapshot)}</td>
+      <td class="c-name px-4 py-2.5">${esc(x.name_snapshot || '—')}</td>
+      <td class="c-what px-4 py-2.5">${watch ? esc(x.video_title_snapshot || '—') : esc(device(x.user_agent))}</td>
+      ${owner ? `<td class="c-act px-2 py-1.5 text-right"><button data-log-id="${Number(x.id)}" class="w-10 h-10 sm:w-8 sm:h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600" title="ลบรายการนี้"><i class="fas fa-trash text-xs"></i></button></td>` : ''}
     </tr>`).join('') || `<tr><td colspan="4">${empty('ไม่มีข้อมูลในช่วงนี้')}</td></tr>`;
   }
 

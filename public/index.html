@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>CK Technical — คลังวิดีโอสอนติดตั้ง</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#F6F8FB">
@@ -27,6 +27,11 @@
     .cover-img { transition: transform .4s ease; }
     /* ซ่อนจนกว่าจะรู้ว่าล็อกอินอยู่หรือไม่ กันหน้าล็อกอินกระพริบ */
     body.booting #loginPage, body.booting #mainPage { visibility: hidden; }
+    html { -webkit-tap-highlight-color: transparent; }
+    /* iOS ซูมหน้าเองถ้าตัวอักษรในช่องกรอก < 16px */
+    @media (max-width: 639px) { input, select, textarea { font-size: 16px !important; } }
+    .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+    @media (hover: none) { .card:hover { transform: none; box-shadow: none; } .card:active { transform: scale(.98); } }
   </style>
 </head>
 <body class="booting font-sans antialiased min-h-screen selection:bg-brand-600 selection:text-white">
@@ -106,8 +111,10 @@
 
         <div class="relative flex-1 max-w-xl mx-auto">
           <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#98A2B3] text-sm"></i>
-          <input type="search" id="searchInput" placeholder="ค้นหารุ่นอุปกรณ์ เช่น TFM223, VA9104, PICV"
-                 class="w-full h-10 pl-10 pr-3 rounded-[10px] bg-[#F1F4F9] border border-transparent focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15 outline-none text-sm transition">
+          <input type="search" id="searchInput" placeholder="ค้นหารุ่น เช่น TFM223, VA9104"
+                 enterkeyhint="search" autocomplete="off"
+                 class="w-full h-10 pl-10 pr-10 rounded-[10px] bg-[#F1F4F9] border border-transparent focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15 outline-none text-sm transition [&::-webkit-search-cancel-button]:hidden">
+          <button id="searchClear" type="button" aria-label="ล้างคำค้น" class="hidden absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full text-[#98A2B3] hover:text-ink"><i class="fas fa-circle-xmark"></i></button>
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
@@ -132,28 +139,45 @@
       </aside>
 
       <section class="flex-1 min-w-0">
-        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-5">
           <div>
-            <h2 class="text-2xl sm:text-[28px] font-bold tracking-tight">คลังวิดีโอเทคนิค</h2>
-            <p id="libSummary" class="text-sm text-muted mt-1">&nbsp;</p>
+            <h2 class="text-[22px] sm:text-[28px] font-bold tracking-tight">คลังวิดีโอเทคนิค</h2>
+            <p id="libSummary" class="text-[13px] sm:text-sm text-muted mt-0.5 sm:mt-1">&nbsp;</p>
           </div>
-          <div id="typeFilter" role="tablist" class="inline-flex p-1 bg-white border border-line rounded-xl self-start sm:self-auto">
+          <div id="typeFilter" role="tablist" class="hidden sm:inline-flex p-1 bg-white border border-line rounded-xl self-start sm:self-auto">
             <button data-type="" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium">ทั้งหมด</button>
             <button data-type="video" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium"><i class="fas fa-play text-[10px] mr-1.5"></i>วิดีโอ</button>
             <button data-type="pdf" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium"><i class="fas fa-file-lines text-[11px] mr-1.5"></i>แผนผัง PDF</button>
           </div>
         </div>
 
-        <!-- Category chips (mobile/tablet) -->
-        <div id="categoryChips" class="lg:hidden flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 pb-1 mb-5"></div>
-
-        <div id="loadingState" class="hidden grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
-          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
-          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
-          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
-          <div class="h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+        <!-- มือถือ/แท็บเล็ต: แถบกรองติดหัวจอ -->
+        <div id="filterBar" class="lg:hidden sticky top-16 z-30 -mx-4 px-4 sm:-mx-6 sm:px-6 pt-2 pb-2.5 mb-4 bg-canvas/95 backdrop-blur border-b border-transparent transition-colors">
+          <div id="typeFilterMobile" class="sm:hidden grid grid-cols-3 p-1 bg-white border border-line rounded-xl mb-2.5">
+            <button data-type="" class="type-pill h-9 rounded-lg text-[13px] font-medium">ทั้งหมด</button>
+            <button data-type="video" class="type-pill h-9 rounded-lg text-[13px] font-medium">วิดีโอ</button>
+            <button data-type="pdf" class="type-pill h-9 rounded-lg text-[13px] font-medium">แผนผัง PDF</button>
+          </div>
+          <div id="categoryChips" class="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6"></div>
         </div>
-        <div id="videoGrid" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5"></div>
+
+        <!-- ดูล่าสุด (เก็บในเครื่องนี้) -->
+        <div id="recentWrap" class="hidden mb-6">
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-[15px] font-semibold"><i class="fas fa-clock-rotate-left text-muted text-[13px] mr-1.5"></i>ดูล่าสุด</h3>
+            <button id="recentClear" class="text-[12px] text-muted hover:text-ink px-2 py-1">ล้าง</button>
+          </div>
+          <div id="recentList" class="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 snap-x"></div>
+        </div>
+
+        <div id="loadingState" class="hidden grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3 sm:gap-5">
+          <div class="h-[210px] sm:h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+          <div class="h-[210px] sm:h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+          <div class="h-[210px] sm:h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+          <div class="h-[210px] sm:h-[250px] rounded-2xl bg-white border border-line animate-pulse"></div>
+        </div>
+        <p id="resultCount" class="hidden text-[13px] text-muted mb-3"></p>
+        <div id="videoGrid" class="grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3 sm:gap-5"></div>
       </section>
     </div>
 
@@ -169,15 +193,20 @@
     </footer>
   </div>
 
+  <button id="toTop" aria-label="กลับขึ้นด้านบน" class="fixed right-4 z-40 w-11 h-11 rounded-full bg-white border border-line shadow-lg text-ink flex items-center justify-center opacity-0 pointer-events-none translate-y-2 transition-all" style="bottom:max(1rem,env(safe-area-inset-bottom))"><i class="fas fa-arrow-up"></i></button>
+
   <!-- ========================= PLAYER ========================= -->
-  <div id="playerOverlay" class="fixed inset-0 z-[9990] bg-[#0B1220]/95 flex-col" style="display:none">
-    <div class="h-16 shrink-0 flex items-center gap-3 px-4 sm:px-6 text-white">
-      <span id="playingKind" class="text-[11px] font-semibold px-2 py-1 rounded-md bg-white/10 shrink-0">วิดีโอ</span>
-      <h3 id="playingTitle" class="flex-1 min-w-0 truncate font-medium text-[15px]"></h3>
-      <button id="closePlayerBtn" aria-label="ปิด" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"><i class="fas fa-xmark text-lg"></i></button>
+  <div id="playerOverlay" class="fixed inset-0 z-[9990] bg-[#0B1220] flex-col" style="display:none">
+    <div class="shrink-0 flex items-center gap-2 sm:gap-3 px-3 sm:px-6 text-white" style="padding-top:max(.75rem,env(safe-area-inset-top));padding-bottom:.75rem">
+      <button id="closePlayerBtn" aria-label="ปิด" class="w-10 h-10 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"><i class="fas fa-arrow-left sm:hidden"></i><i class="fas fa-xmark text-lg hidden sm:inline"></i></button>
+      <div class="flex-1 min-w-0">
+        <span id="playingKind" class="text-[11px] font-semibold text-white/60">วิดีโอ</span>
+        <h3 id="playingTitle" class="truncate font-medium text-[14px] sm:text-[15px] leading-snug"></h3>
+      </div>
+      <a id="openExternal" href="#" target="_blank" rel="noopener" class="hidden h-10 px-3 shrink-0 rounded-full bg-white/10 hover:bg-white/20 items-center gap-2 text-[13px] font-medium transition-colors"><i class="fas fa-up-right-from-square text-xs"></i><span class="hidden sm:inline">เปิดเต็มจอ</span></a>
     </div>
-    <div class="flex-1 min-h-0 flex items-center justify-center px-3 sm:px-6 pb-6">
-      <div id="videoWrapper" class="relative w-full max-w-6xl aspect-video max-h-full rounded-xl overflow-hidden bg-black flex items-center justify-center"></div>
+    <div class="flex-1 min-h-0 flex items-center justify-center px-0 sm:px-6 pb-safe sm:pb-6">
+      <div id="videoWrapper" class="relative w-full max-w-6xl aspect-video max-h-full sm:rounded-xl overflow-hidden bg-black flex items-center justify-center"></div>
     </div>
   </div>
 
@@ -232,6 +261,29 @@
       if (t.includes('frese') || t.includes('ffese')) return 'FRESE';
       if (t.includes('elitech')) return 'ELITECH';
       return 'CK TECHNICAL';
+    }
+
+    // ---------- ดูล่าสุด (เก็บในเบราว์เซอร์เครื่องนี้) ----------
+    const RECENT_KEY = 'ck_recent';
+    function getRecent() {
+      try { const a = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (_) { return []; }
+    }
+    function setRecent(ids) { try { localStorage.setItem(RECENT_KEY, JSON.stringify(ids.slice(0, 8))); } catch (_) {} }
+    function pushRecent(id) { setRecent([id, ...getRecent().filter(x => x !== id)]); }
+
+    function renderRecent() {
+      const busy = filters.category || filters.type || $('searchInput').value.trim();
+      const items = getRecent().map(id => allVideos.find(v => v.id === id)).filter(Boolean);
+      $('recentWrap').classList.toggle('hidden', busy || items.length === 0);
+      $('recentList').innerHTML = items.map(v => {
+        const pdf = v.kind === 'pdf';
+        return `<button type="button" data-video-id="${escapeHtml(v.id)}" class="card snap-start shrink-0 w-[150px] sm:w-[190px] text-left bg-white border border-line rounded-xl overflow-hidden">
+          <div class="aspect-video px-2.5 py-2 flex items-end ${pdf ? 'bg-pdf-bg text-pdf-fg' : 'bg-brand-50 text-brand-900'}">
+            <span class="text-[15px] font-bold leading-none truncate">${escapeHtml(modelCode(v))}</span>
+          </div>
+          <div class="px-2.5 py-2 text-[12px] font-medium leading-snug line-clamp-2 h-[42px]">${escapeHtml(cleanTitle(v.title))}</div>
+        </button>`;
+      }).join('');
     }
 
     // ---------- Toast ----------
@@ -334,6 +386,7 @@
     async function executeLogout() {
       closeConfirmModal();
       await api('/api/logout', { method: 'POST' });
+      setRecent([]);
       showLogin();
     }
 
@@ -416,22 +469,22 @@
         ? `<img src="${escapeHtml(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="cover-img absolute inset-0 w-full h-full object-cover" onerror="this.remove()">`
         : '';
       return `
-        <button type="button" data-video-id="${escapeHtml(v.id)}" class="card text-left bg-white border border-line rounded-2xl overflow-hidden flex flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-600/25">
+        <button type="button" data-video-id="${escapeHtml(v.id)}" class="card text-left bg-white border border-line rounded-xl sm:rounded-2xl overflow-hidden flex flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-600/25">
           <div class="relative aspect-video overflow-hidden ${pdf ? 'bg-pdf-bg' : 'bg-brand-50'}">
-            <div class="absolute inset-0 p-4 flex flex-col justify-between">
-              <span class="text-[10px] font-semibold tracking-[.14em] ${pdf ? 'text-pdf-fg/70' : 'text-[#3A4E7A]'}">${pdf ? 'WIRING DIAGRAM' : escapeHtml(brandOf(v.title))}</span>
-              <span class="text-[26px] sm:text-[30px] font-bold leading-none tracking-tight break-all line-clamp-2 ${pdf ? 'text-pdf-fg' : 'text-brand-900'}">${escapeHtml(code)}</span>
+            <div class="absolute inset-0 p-2.5 sm:p-4 flex flex-col justify-between">
+              <span class="text-[8px] sm:text-[10px] font-semibold tracking-[.12em] sm:tracking-[.14em] truncate ${pdf ? 'text-pdf-fg/70' : 'text-[#3A4E7A]'}">${pdf ? 'WIRING DIAGRAM' : escapeHtml(brandOf(v.title))}</span>
+              <span class="text-[17px] sm:text-[30px] font-bold leading-none tracking-tight break-all line-clamp-2 pr-8 sm:pr-0 ${pdf ? 'text-pdf-fg' : 'text-brand-900'}">${escapeHtml(code)}</span>
             </div>
             ${thumb}
-            <span class="absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${pdf ? 'bg-white text-pdf-fg' : 'bg-brand-600 text-white'}">
-              <i class="fas ${pdf ? 'fa-file-lines' : 'fa-play ml-0.5'} text-sm"></i>
+            <span class="absolute right-2 bottom-2 sm:right-3 sm:bottom-3 w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md ${pdf ? 'bg-white text-pdf-fg' : 'bg-brand-600 text-white'}">
+              <i class="fas ${pdf ? 'fa-file-lines' : 'fa-play ml-0.5'} text-[10px] sm:text-sm"></i>
             </span>
           </div>
-          <div class="p-4 flex flex-col gap-3 flex-1">
-            <h3 class="font-semibold text-[15px] leading-snug line-clamp-2">${escapeHtml(cleanTitle(v.title))}</h3>
-            <div class="mt-auto flex items-center justify-between gap-2 text-[12px]">
-              <span class="truncate px-2 py-1 rounded-md bg-[#F1F4F9] text-[#3A4352]">${escapeHtml(v.category)}</span>
-              <span class="shrink-0 font-medium ${pdf ? 'text-pdf-fg' : 'text-brand-600'}">${pdf ? 'แผนผัง PDF' : 'วิดีโอ'}</span>
+          <div class="p-2.5 sm:p-4 flex flex-col gap-2 sm:gap-3 flex-1">
+            <h3 class="font-semibold text-[13px] sm:text-[15px] leading-snug line-clamp-3 sm:line-clamp-2">${escapeHtml(cleanTitle(v.title))}</h3>
+            <div class="mt-auto flex items-center justify-between gap-2 text-[11px] sm:text-[12px]">
+              <span class="truncate px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-[#F1F4F9] text-[#3A4352]">${escapeHtml(v.category)}</span>
+              <span class="hidden sm:inline shrink-0 font-medium ${pdf ? 'text-pdf-fg' : 'text-brand-600'}">${pdf ? 'แผนผัง PDF' : 'วิดีโอ'}</span>
             </div>
           </div>
         </button>`;
@@ -452,14 +505,29 @@
     }
 
     function filterVideos() {
-      const words = $('searchInput').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const raw = $('searchInput').value.trim();
+      const words = raw.toLowerCase().split(/\s+/).filter(Boolean);
+      $('searchClear').classList.toggle('hidden', !raw);
       renderTypePills();
-      renderVideos(allVideos.filter(v => {
+      const list = allVideos.filter(v => {
         const hay = `${v.title} ${v.category}`.toLowerCase();
         return words.every(w => hay.includes(w)) &&
           (!filters.category || v.category === filters.category) &&
           (!filters.type || (v.kind || 'video') === filters.type);
-      }));
+      });
+      const busy = raw || filters.category || filters.type;
+      $('resultCount').classList.toggle('hidden', !busy || list.length === 0);
+      $('resultCount').innerText = `พบ ${list.length} รายการ`;
+      renderVideos(list);
+      renderRecent();
+    }
+
+    // เลื่อนให้เห็นผลลัพธ์ตัวแรก (กรณีเลื่อนลงไปแล้วค่อยเปลี่ยนตัวกรอง)
+    function scrollToResults() {
+      const bar = $('filterBar');
+      const offset = 64 + (getComputedStyle(bar).display === 'none' ? 0 : bar.offsetHeight) + 8;
+      const top = $('videoGrid').getBoundingClientRect().top + window.scrollY - offset - 40;
+      if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' });
     }
 
     function pickCategory(e) {
@@ -468,6 +536,8 @@
       filters.category = b.dataset.category;
       renderCategories();
       filterVideos();
+      scrollToResults();
+      $('categoryChips').querySelector(`[data-category="${CSS.escape(filters.category)}"]`)?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     }
 
     // ---------- Player ----------
@@ -479,6 +549,8 @@
 
       $('playingTitle').innerText = video ? cleanTitle(video.title) : '';
       $('playingKind').innerText = pdf ? 'แผนผัง PDF' : 'วิดีโอ';
+      $('openExternal').classList.add('hidden'); $('openExternal').classList.remove('inline-flex');
+      if (!history.state?.player) history.pushState({ player: videoId }, '');
       wrapper.classList.toggle('aspect-video', !pdf);
       wrapper.classList.toggle('h-full', pdf);
       wrapper.classList.toggle('bg-white', pdf);
@@ -490,7 +562,7 @@
       if (overlay.style.display === 'none') return; // ปิดไปก่อนโหลดเสร็จ
       if (r.status === 401) return handleUnauthorized();
       if (!r.ok) {
-        closePlayer();
+        requestClosePlayer();
         showCustomToast(errorText(r));
         return;
       }
@@ -503,37 +575,68 @@
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       wrapper.innerHTML = '';
       wrapper.appendChild(iframe);
+      if (pdf) {
+        $('openExternal').href = r.data.url;
+        $('openExternal').classList.remove('hidden'); $('openExternal').classList.add('inline-flex');
+      }
+      pushRecent(videoId);
     }
 
+    // ปุ่มปิด/Esc → ย้อนประวัติ (ปุ่ม Back ของมือถือจะปิดตัวเล่นแทนการออกจากเว็บ)
+    function requestClosePlayer() {
+      if (history.state?.player) history.back(); else closePlayer();
+    }
     function closePlayer() {
+      if ($('playerOverlay').style.display === 'none') return;
       $('playerOverlay').style.display = 'none';
       $('videoWrapper').innerHTML = '';
       document.body.style.overflow = '';
+      renderRecent();
     }
 
     // ---------- Events ----------
+    window.addEventListener('popstate', () => { if (!history.state?.player) closePlayer(); });
     $('loginForm').addEventListener('submit', doLogin);
     $('logoutBtn').addEventListener('click', requestLogout);
     $('cancelLogoutBtn').addEventListener('click', closeConfirmModal);
     $('confirmLogoutBtn').addEventListener('click', executeLogout);
     $('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmModal(); });
-    $('closePlayerBtn').addEventListener('click', closePlayer);
+    $('closePlayerBtn').addEventListener('click', requestClosePlayer);
+    $('searchClear').addEventListener('click', () => { $('searchInput').value = ''; filterVideos(); $('searchInput').focus(); });
+    $('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.target.blur(); scrollToResults(); } });
+    $('recentList').addEventListener('click', e => { const c = e.target.closest('[data-video-id]'); if (c) openPlayer(c.dataset.videoId); });
+    $('recentClear').addEventListener('click', () => { setRecent([]); renderRecent(); });
+    $('toTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const show = y > 900;
+        $('toTop').classList.toggle('opacity-0', !show); $('toTop').classList.toggle('pointer-events-none', !show); $('toTop').classList.toggle('translate-y-2', !show);
+        $('filterBar').classList.toggle('border-line', y > 140);
+        ticking = false;
+      });
+    }, { passive: true });
     $('searchInput').addEventListener('input', filterVideos);
     $('categoryNav').addEventListener('click', pickCategory);
     $('categoryChips').addEventListener('click', pickCategory);
-    $('typeFilter').addEventListener('click', e => {
+    const pickType = e => {
       const b = e.target.closest('[data-type]');
       if (!b) return;
       filters.type = b.dataset.type;
       filterVideos();
-    });
+      scrollToResults();
+    };
+    $('typeFilter').addEventListener('click', pickType);
+    $('typeFilterMobile').addEventListener('click', pickType);
     $('videoGrid').addEventListener('click', e => {
       const card = e.target.closest('[data-video-id]');
       if (card) openPlayer(card.dataset.videoId);
     });
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
-      if ($('playerOverlay').style.display !== 'none') closePlayer();
+      if ($('playerOverlay').style.display !== 'none') requestClosePlayer();
       else if (!$('confirmModal').classList.contains('hidden')) closeConfirmModal();
     });
 
