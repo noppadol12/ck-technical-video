@@ -19,6 +19,7 @@
     @keyframes slideInDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     .toast-enter { animation: slideInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     .btn-press:active { transform: scale(0.97); }
+    .view-btn[aria-pressed="true"] { background: #E8EEFB; color: #1749B0; }
     input[type="date"]::-webkit-calendar-picker-indicator { opacity: .6; cursor: pointer; }
     html { -webkit-tap-highlight-color: transparent; }
     .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { scrollbar-width: none; }
@@ -156,8 +157,14 @@
           <select id="videoCategory" class="w-[130px] sm:w-auto shrink-0 px-3 sm:px-4 py-3 rounded-xl border border-slate-200 bg-white font-medium"></select>
           <button data-action="video-new" class="hidden sm:block shrink-0 px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium btn-press"><i class="fas fa-plus mr-1.5"></i>เพิ่มวิดีโอ</button>
         </div>
-        <p id="videoCount" class="text-sm text-slate-500 mb-3"></p>
-        <div id="videoList" class="space-y-3"></div>
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <p id="videoCount" class="text-sm text-slate-500 min-w-0"></p>
+          <div id="videoViewToggle" class="inline-flex p-1 bg-white border border-slate-200 rounded-xl shrink-0" role="group" aria-label="รูปแบบการแสดง">
+            <button data-view="list" class="view-btn w-9 h-8 rounded-lg text-slate-500" title="แสดงแบบรายการ" aria-label="แสดงแบบรายการ"><i class="fas fa-list"></i></button>
+            <button data-view="grid" class="view-btn w-9 h-8 rounded-lg text-slate-500" title="แสดงแบบตาราง" aria-label="แสดงแบบตาราง"><i class="fas fa-th-large"></i></button>
+          </div>
+        </div>
+        <div id="videoList"></div>
       </section>
 
       <!-- Categories -->
@@ -229,7 +236,7 @@
   // ---------------------------------------------------------------- utils
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const state = { admin: null, tab: 'dashboard', customers: [], videos: [], categories: [], reportType: 'watch' };
+  const state = { admin: null, tab: 'dashboard', customers: [], videos: [], categories: [], reportType: 'watch', videoView: (() => { try { return localStorage.getItem('ck_admin_video_view') === 'grid' ? 'grid' : 'list'; } catch (_) { return 'list'; } })() };
 
   const ERR = {
     invalid_login: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
@@ -622,6 +629,40 @@
       (!term || v.title.toLowerCase().includes(term)) &&
       (!cat || (cat === 'none' ? v.category_id == null : String(v.category_id) === cat)));
     $('videoCount').textContent = `${list.length} จาก ${state.videos.length} เรื่อง · แสดงอยู่ ${state.videos.filter(v => v.is_published).length}` + (filtered ? ' · ล้างตัวกรองเพื่อเลื่อนลำดับ' : '');
+    const grid = state.videoView === 'grid';
+    document.querySelectorAll('.view-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.videoView)));
+    $('videoList').className = grid ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4' : 'space-y-3';
+    const thumbImg = v => v.thumbnail ? `<img src="${esc(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">` : '';
+    const actions = (v, size) => `
+          ${v.bunny_status === 'failed' && v.source === 'drive' && !v.is_document ? `<button data-action="video-migrate" data-id="${esc(v.id)}" class="${size} rounded-xl hover:bg-brand-50 text-brand-600" title="ลองย้ายไป Bunny อีกครั้ง"><i class="fas fa-rotate-right"></i></button>` : ''}
+          <button data-action="video-share" data-id="${esc(v.id)}" class="${size} rounded-xl hover:bg-slate-100 text-slate-500" title="แชร์ลิงก์ให้ลูกค้า"><i class="fas fa-share-nodes"></i></button>
+          <button data-action="video-publish" data-id="${esc(v.id)}" class="${size} rounded-xl hover:bg-slate-100 text-slate-500" title="${v.is_published ? 'ซ่อนจากลูกค้า' : 'แสดงให้ลูกค้า'}"><i class="fas ${v.is_published ? 'fa-eye' : 'fa-eye-slash'}"></i></button>
+          <button data-action="video-edit" data-id="${esc(v.id)}" class="${size} rounded-xl hover:bg-slate-100 text-slate-500" title="แก้ไข"><i class="fas fa-pen"></i></button>
+          ${isOwner() ? `<button data-action="video-delete" data-id="${esc(v.id)}" class="${size} rounded-xl hover:bg-red-50 text-red-500" title="ลบ"><i class="fas fa-trash"></i></button>` : ''}`;
+    if (grid) {
+      $('videoList').innerHTML = list.length ? list.map(v => `
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-soft overflow-hidden flex flex-col ${v.is_published ? '' : 'opacity-60'}">
+        <div class="aspect-video bg-slate-900 relative">
+          <i class="fas ${v.is_document ? 'fa-file-pdf' : 'fa-film'} absolute inset-0 m-auto w-fit h-fit text-white/20 text-2xl"></i>
+          ${thumbImg(v)}
+          ${v.is_published ? '' : '<span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-amber-500 text-white text-[11px] font-semibold"><i class="fas fa-eye-slash mr-1"></i>ซ่อนอยู่</span>'}
+          ${filtered ? '' : `
+          <div class="absolute top-1.5 right-1.5 flex gap-1">
+            <button data-action="video-up" data-id="${esc(v.id)}" class="w-7 h-7 rounded-lg bg-white/90 hover:bg-white text-slate-600 shadow-sm" title="เลื่อนไปก่อนหน้า" aria-label="เลื่อนไปก่อนหน้า"><i class="fas fa-chevron-left text-xs"></i></button>
+            <button data-action="video-down" data-id="${esc(v.id)}" class="w-7 h-7 rounded-lg bg-white/90 hover:bg-white text-slate-600 shadow-sm" title="เลื่อนไปถัดไป" aria-label="เลื่อนไปถัดไป"><i class="fas fa-chevron-right text-xs"></i></button>
+          </div>`}
+        </div>
+        <div class="p-3 flex-1 flex flex-col gap-1.5 min-w-0">
+          <div class="font-medium text-sm leading-snug line-clamp-2">${esc(v.title)}</div>
+          <div class="text-xs text-slate-500 truncate"><i class="fas fa-layer-group mr-1 text-slate-400"></i>${esc(v.category || 'ทั่วไป')}</div>
+          <div class="text-xs text-slate-500 flex flex-wrap gap-x-3"><span><i class="fas fa-eye mr-1 text-slate-400"></i>${v.total_views} ครั้ง · ${v.unique_viewers} คน</span>${sourceBadge(v)}</div>
+          ${v.bunny_status === 'failed' && v.bunny_error ? `<div class="text-xs text-red-600">${esc(v.bunny_error)}</div>` : ''}
+        </div>
+        <div class="flex justify-between sm:justify-end gap-0.5 px-2 py-1.5 border-t border-slate-100">${actions(v, 'w-8 h-8 text-sm')}</div>
+      </div>`).join('') : `<div class="col-span-full">${empty(state.videos.length ? 'ไม่พบวิดีโอที่ตรงกับเงื่อนไข' : 'ยังไม่มีวิดีโอ', 'fa-film')}</div>`;
+      renderMigratePanel();
+      return;
+    }
     $('videoList').innerHTML = list.length ? list.map(v => `
       <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-3 flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-2 ${v.is_published ? '' : 'opacity-60'}">
         ${filtered ? '' : `
@@ -1070,6 +1111,13 @@
   }
 
   // ---------------------------------------------------------------- events
+  $('videoViewToggle').addEventListener('click', e => {
+    const b = e.target.closest('[data-view]');
+    if (!b) return;
+    state.videoView = b.dataset.view;
+    try { localStorage.setItem('ck_admin_video_view', state.videoView); } catch (_) {}
+    renderVideos();
+  });
   $('reportPurge').addEventListener('click', purgeFiltered);
   $('reportBody').addEventListener('click', e => {
     const b = e.target.closest('[data-log-id]');
