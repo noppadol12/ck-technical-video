@@ -84,7 +84,7 @@
         </div>
       </div>
       <nav class="hidden sm:flex max-w-6xl mx-auto px-4 pb-3 gap-2 overflow-x-auto" role="tablist">
-        <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="dashboard"><i class="fas fa-chart-simple mr-1.5"></i>ภาพรวม</button>
+        <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="dashboard"><i class="fas fa-chart-pie mr-1.5"></i>ภาพรวม</button>
         <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="customers"><i class="fas fa-users mr-1.5"></i>ลูกค้า</button>
         <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="videos"><i class="fas fa-film mr-1.5"></i>วิดีโอ</button>
         <button class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100" role="tab" data-tab="categories"><i class="fas fa-layer-group mr-1.5"></i>หมวดหมู่</button>
@@ -204,7 +204,7 @@
 
     <!-- มือถือ: เมนูล่าง -->
     <nav id="bottomNav" class="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-slate-200 grid grid-cols-5" style="padding-bottom:env(safe-area-inset-bottom)" role="tablist">
-      <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="dashboard"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-chart-simple"></i></span>ภาพรวม</button>
+      <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="dashboard"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-chart-pie"></i></span>ภาพรวม</button>
       <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="customers"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-users"></i></span>ลูกค้า</button>
       <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="videos"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-film"></i></span>วิดีโอ</button>
       <button class="tab-btn bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-slate-500" role="tab" data-tab="categories"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fas fa-layer-group"></i></span>หมวดหมู่</button>
@@ -422,7 +422,7 @@
       <div>
         <div class="flex justify-between gap-3 text-sm mb-1"><span class="truncate min-w-0"><span class="text-slate-400 mr-1.5">${i + 1}.</span>${esc(t.title)}</span><span class="shrink-0 font-semibold">${t.views} <span class="font-normal text-slate-400">ครั้ง · ${t.viewers} คน</span></span></div>
         <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-brand-500 rounded-full" style="width:${(t.views / max) * 100}%"></div></div>
-      </div>`).join('') : empty('ยังไม่มีการดูใน 30 วันที่ผ่านมา', 'fa-chart-simple');
+      </div>`).join('') : empty('ยังไม่มีการดูใน 30 วันที่ผ่านมา', 'fa-chart-pie');
 
     const row = (c, right) => `<button data-action="customer-edit" data-id="${esc(c.id)}" class="w-full flex justify-between gap-3 py-2.5 text-left hover:bg-slate-50 px-2 -mx-2 rounded-lg"><span class="min-w-0"><span class="block font-medium truncate">${esc(c.name)}</span><span class="block text-xs text-slate-500 font-mono">${esc(c.code)}</span></span><span class="text-sm text-slate-500 shrink-0">${right}</span></button>`;
     $('expiringList').innerHTML = s.expiring_soon.length ? s.expiring_soon.map(c => row(c, fmtDate(c.expires_at))).join('') : '<p class="text-sm text-slate-400 py-2">ไม่มี</p>';
@@ -658,7 +658,7 @@
   function sourceBadge(v) {
     if (v.status === 'processing') return '<span class="text-brand-600 font-medium"><i class="fas fa-spinner fa-spin mr-1"></i>กำลังแปลงไฟล์ (ยังไม่แสดงให้ลูกค้า)</span>';
     if (v.status === 'failed') return '<span class="text-red-600 font-medium"><i class="fas fa-circle-exclamation mr-1"></i>อัปโหลดไม่สำเร็จ</span>';
-    if (v.source === 'bunny') return '<span class="text-emerald-700 font-medium"><i class="fas fa-shield-halved mr-1"></i>Bunny</span>';
+    if (v.source === 'bunny') return '<span class="text-emerald-700 font-medium"><i class="fas fa-shield-alt mr-1"></i>Bunny</span>';
     if (v.bunny_status === 'fetching' || v.bunny_status === 'processing') return '<span class="text-brand-600 font-medium"><i class="fas fa-spinner fa-spin mr-1"></i>กำลังย้ายไป Bunny (ยังเล่นจาก Drive)</span>';
     if (v.bunny_status === 'failed') return '<span class="text-red-600 font-medium"><i class="fab fa-google-drive mr-1"></i>Drive · ย้ายไม่สำเร็จ</span>';
     if (v.is_document) return '<span class="text-slate-500"><i class="fas fa-file-pdf mr-1"></i>PDF บน Drive</span>';
@@ -797,7 +797,7 @@
             'ไฟล์บน Drive ต้องแชร์แบบ "ทุกคนที่มีลิงก์ดูได้" จึงจะเล่นได้ · เหมาะกับ PDF')}
           <div id="drivePreview" class="hidden mb-4 aspect-video rounded-2xl bg-slate-900 overflow-hidden relative"></div>
         </div>
-        ${onBunny ? '<div class="mb-4 text-sm rounded-xl bg-emerald-50 text-emerald-700 px-4 py-3"><i class="fas fa-shield-halved mr-1.5"></i>ไฟล์อยู่บน Bunny (ลิงก์หมดอายุเอง ดาวน์โหลดไม่ได้)</div>' : ''}
+        ${onBunny ? '<div class="mb-4 text-sm rounded-xl bg-emerald-50 text-emerald-700 px-4 py-3"><i class="fas fa-shield-alt mr-1.5"></i>ไฟล์อยู่บน Bunny (ลิงก์หมดอายุเอง ดาวน์โหลดไม่ได้)</div>' : ''}
         ${field('ชื่อวิดีโอ <span class="text-red-500">*</span>', `<input name="title" maxlength="200" required class="${inputCls}" value="${esc(v?.title)}">`)}
         ${field('หมวดหมู่', `<select name="category" class="${inputCls}">${catOptions}</select>`)}
         <div id="newCatWrap" class="hidden">${field('ชื่อหมวดใหม่', `<input name="category_name" maxlength="80" class="${inputCls}">`)}</div>
