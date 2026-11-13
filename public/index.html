@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>CK Technical — คลังวิดีโอสอนติดตั้ง</title>
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#F6F8FB">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CK Technical">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,13 +64,28 @@
     </div>
   </div>
 
+  <!-- ========================= iOS INSTALL HELP ========================= -->
+  <div id="iosHelp" class="fixed inset-0 z-[9998] hidden items-end sm:items-center justify-center bg-ink/40 p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full sm:max-w-sm border border-line shadow-xl pb-safe">
+      <div class="flex items-center gap-3 mb-4">
+        <img src="/icons/icon-192.png" alt="" class="w-12 h-12 rounded-xl border border-line">
+        <div><div class="font-semibold">ติดตั้ง CK Technical</div><div class="text-[13px] text-muted">บน iPhone / iPad (Safari)</div></div>
+      </div>
+      <ol class="space-y-3 text-[14px] text-[#3A4352] mb-6">
+        <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-[12px] font-bold flex items-center justify-center shrink-0">1</span><span>แตะปุ่ม <b>แชร์</b> <i class="fas fa-arrow-up-from-bracket text-brand-600 mx-0.5"></i> ที่แถบล่างของ Safari</span></li>
+        <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-[12px] font-bold flex items-center justify-center shrink-0">2</span><span>เลื่อนลงแล้วเลือก <b>เพิ่มไปยังหน้าจอโฮม</b> <i class="far fa-square-plus mx-0.5"></i></span></li>
+        <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-[12px] font-bold flex items-center justify-center shrink-0">3</span><span>แตะ <b>เพิ่ม</b> มุมขวาบน ไอคอน CK จะอยู่บนหน้าจอ</span></li>
+      </ol>
+      <p class="text-[12px] text-muted mb-4">ถ้าเปิดลิงก์จากในแอป LINE ให้กด ⋯ แล้วเลือก "เปิดในเบราว์เซอร์" ก่อน</p>
+      <button id="iosHelpClose" class="w-full h-11 rounded-xl bg-[#F1F4F9] hover:bg-[#E6EBF2] font-medium text-sm">เข้าใจแล้ว</button>
+    </div>
+  </div>
+
   <!-- ========================= LOGIN ========================= -->
   <main id="loginPage" class="min-h-screen flex flex-col items-center justify-center px-5 py-10">
     <div class="w-full max-w-[400px]">
       <div class="flex items-center gap-3 mb-8">
-        <div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-sm">
-          <i class="fas fa-play text-sm ml-0.5"></i>
-        </div>
+        <img src="/icons/logo.png" alt="CK Aircond" width="48" height="55" class="w-12 h-auto">
         <div class="leading-tight">
           <div class="font-bold text-[17px]">CK Technical</div>
           <div class="text-xs text-muted">ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์</div>
@@ -102,7 +124,7 @@
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-line">
       <div class="max-w-[1320px] mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
         <div class="flex items-center gap-3 shrink-0">
-          <div class="w-9 h-9 rounded-[10px] bg-brand-600 text-white flex items-center justify-center"><i class="fas fa-play text-xs ml-0.5"></i></div>
+          <img src="/icons/logo.png" alt="CK Aircond" width="36" height="41" class="w-9 h-auto">
           <div class="leading-tight hidden sm:block">
             <div class="font-bold text-[15px]">CK Technical</div>
             <div class="text-[11px] text-muted">ศูนย์ความรู้งานติดตั้ง · ซี.เค.แอร์คอนด์</div>
@@ -161,6 +183,26 @@
           <div id="categoryChips" class="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6"></div>
         </div>
 
+        <!-- แนะนำติดตั้งเป็นแอป (มือถือ) -->
+        <div id="installBanner" class="hidden mb-5 bg-white border border-line rounded-2xl p-3.5 items-center gap-3">
+          <img src="/icons/icon-192.png" alt="" class="w-11 h-11 rounded-xl border border-line shrink-0">
+          <div class="flex-1 min-w-0">
+            <div class="text-[14px] font-semibold leading-tight">เพิ่มไว้ที่หน้าจอโฮม</div>
+            <div class="text-[12px] text-muted leading-snug mt-0.5">เปิดจากไอคอนได้เหมือนแอป ไม่ต้องจำลิงก์</div>
+          </div>
+          <button id="installBtn" class="h-9 px-3.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-[13px] font-semibold shrink-0">ติดตั้ง</button>
+          <button id="installDismiss" aria-label="ปิด" class="w-8 h-8 -mr-1 rounded-lg text-[#98A2B3] hover:text-ink shrink-0"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <!-- บันทึกไว้ (★) -->
+        <div id="favWrap" class="hidden mb-6">
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-[15px] font-semibold"><i class="fas fa-star text-amber-400 text-[13px] mr-1.5"></i>บันทึกไว้</h3>
+            <span id="favCount" class="text-[12px] text-muted"></span>
+          </div>
+          <div id="favList" class="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 snap-x"></div>
+        </div>
+
         <!-- ดูล่าสุด (เก็บในเครื่องนี้) -->
         <div id="recentWrap" class="hidden mb-6">
           <div class="flex items-center justify-between mb-2.5">
@@ -203,6 +245,8 @@
         <span id="playingKind" class="text-[11px] font-semibold text-white/60">วิดีโอ</span>
         <h3 id="playingTitle" class="truncate font-medium text-[14px] sm:text-[15px] leading-snug"></h3>
       </div>
+      <button id="playerFav" aria-label="บันทึก" class="w-10 h-10 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"><i class="far fa-star"></i></button>
+      <button id="playerShare" aria-label="แชร์ลิงก์" class="w-10 h-10 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"><i class="fas fa-share-nodes"></i></button>
       <a id="openExternal" href="#" target="_blank" rel="noopener" class="hidden h-10 px-3 shrink-0 rounded-full bg-white/10 hover:bg-white/20 items-center gap-2 text-[13px] font-medium transition-colors"><i class="fas fa-up-right-from-square text-xs"></i><span class="hidden sm:inline">เปิดเต็มจอ</span></a>
     </div>
     <div class="flex-1 min-h-0 flex items-center justify-center px-0 sm:px-6 pb-safe sm:pb-6">
@@ -263,34 +307,55 @@
       return 'CK TECHNICAL';
     }
 
-    // ---------- ดูล่าสุด (เก็บในเบราว์เซอร์เครื่องนี้) ----------
-    const RECENT_KEY = 'ck_recent';
-    function getRecent() {
-      try { const a = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (_) { return []; }
+    // ---------- ดูล่าสุด / บันทึกไว้ (เก็บในเบราว์เซอร์เครื่องนี้ แยกตามลูกค้า) ----------
+    let customerId = '';
+    let currentVideoId = null;
+    const storeKey = k => `ck_${k}:${customerId || 'anon'}`;
+    function readList(k) {
+      try { const a = JSON.parse(localStorage.getItem(storeKey(k)) || '[]'); return Array.isArray(a) ? a.filter(x => typeof x === 'string') : []; } catch (_) { return []; }
     }
-    function setRecent(ids) { try { localStorage.setItem(RECENT_KEY, JSON.stringify(ids.slice(0, 8))); } catch (_) {} }
-    function pushRecent(id) { setRecent([id, ...getRecent().filter(x => x !== id)]); }
+    function writeList(k, ids) { try { localStorage.setItem(storeKey(k), JSON.stringify(ids)); } catch (_) {} }
+    const getRecent = () => readList('recent');
+    const setRecent = ids => writeList('recent', ids.slice(0, 8));
+    const pushRecent = id => setRecent([id, ...getRecent().filter(x => x !== id)]);
+    const getFavs = () => readList('fav');
+    const isFav = id => getFavs().includes(id);
+    function toggleFav(id) {
+      const favs = getFavs();
+      const on = !favs.includes(id);
+      writeList('fav', on ? [id, ...favs].slice(0, 100) : favs.filter(x => x !== id));
+      showCustomToast(on ? 'บันทึกไว้แล้ว ดูได้ที่ "บันทึกไว้" ด้านบน' : 'นำออกจากรายการที่บันทึกแล้ว', 'ok');
+      return on;
+    }
 
-    function renderRecent() {
-      const busy = filters.category || filters.type || $('searchInput').value.trim();
-      const items = getRecent().map(id => allVideos.find(v => v.id === id)).filter(Boolean);
-      $('recentWrap').classList.toggle('hidden', busy || items.length === 0);
-      $('recentList').innerHTML = items.map(v => {
-        const pdf = v.kind === 'pdf';
-        return `<button type="button" data-video-id="${escapeHtml(v.id)}" class="card snap-start shrink-0 w-[150px] sm:w-[190px] text-left bg-white border border-line rounded-xl overflow-hidden">
+    function miniCard(v) {
+      const pdf = v.kind === 'pdf';
+      return `<button type="button" data-video-id="${escapeHtml(v.id)}" class="card snap-start shrink-0 w-[150px] sm:w-[190px] text-left bg-white border border-line rounded-xl overflow-hidden">
           <div class="aspect-video px-2.5 py-2 flex items-end ${pdf ? 'bg-pdf-bg text-pdf-fg' : 'bg-brand-50 text-brand-900'}">
             <span class="text-[15px] font-bold leading-none truncate">${escapeHtml(modelCode(v))}</span>
           </div>
           <div class="px-2.5 py-2 text-[12px] font-medium leading-snug line-clamp-2 h-[42px]">${escapeHtml(cleanTitle(v.title))}</div>
         </button>`;
-      }).join('');
     }
+    function renderShelves() {
+      const busy = filters.category || filters.type || $('searchInput').value.trim();
+      const pick = ids => ids.map(id => allVideos.find(v => v.id === id)).filter(Boolean);
+      const favs = pick(getFavs());
+      const recent = pick(getRecent());
+      $('favWrap').classList.toggle('hidden', busy || favs.length === 0);
+      $('favCount').innerText = `${favs.length} เรื่อง`;
+      $('favList').innerHTML = favs.map(miniCard).join('');
+      $('recentWrap').classList.toggle('hidden', busy || recent.length === 0);
+      $('recentList').innerHTML = recent.map(miniCard).join('');
+    }
+    const renderRecent = renderShelves;
 
     // ---------- Toast ----------
     let toastTimer;
-    function showCustomToast(message) {
+    function showCustomToast(message, kind = 'err') {
       const toast = $('toastMessage');
       $('toastText').innerText = message;
+      toast.querySelector('i').className = kind === 'ok' ? 'fas fa-circle-check text-emerald-400' : 'fas fa-circle-exclamation text-red-400';
       toast.classList.remove('hidden', 'toast-enter');
       void toast.offsetWidth;
       toast.classList.add('flex', 'toast-enter');
@@ -299,8 +364,9 @@
     }
 
     // ---------- เปลี่ยนหน้า ----------
-    function showMain(name) {
-      $('userName').innerText = name || '';
+    function showMain(me) {
+      customerId = me?.id || '';
+      $('userName').innerText = me?.name || '';
       $('loginPage').classList.add('hidden');
       $('mainPage').classList.remove('hidden');
       $('mainPage').classList.add('flex');
@@ -364,7 +430,7 @@
       const r = await api('/api/login', { method: 'POST', body: { code } });
       if (r.ok) {
         input.value = '';
-        showMain(r.data.name);
+        showMain(r.data);
         return;
       }
       showCustomToast(errorText(r));
@@ -386,7 +452,6 @@
     async function executeLogout() {
       closeConfirmModal();
       await api('/api/logout', { method: 'POST' });
-      setRecent([]);
       showLogin();
     }
 
@@ -418,6 +483,19 @@
       $('libSummary').innerText = `${vids} วิดีโอสอนติดตั้ง · ${allVideos.length - vids} แผนผังวงจร PDF · ${cats} หมวด`;
       renderCategories();
       filterVideos();
+      openPendingVideo();
+    }
+
+    // ---------- ลิงก์ตรงไปวิดีโอ (?v=<id>) ----------
+    let pendingVideo = new URLSearchParams(location.search).get('v');
+    function videoLink(id) { return `${location.origin}/?v=${encodeURIComponent(id)}`; }
+    function openPendingVideo() {
+      if (!pendingVideo) return;
+      const id = pendingVideo;
+      pendingVideo = null;
+      history.replaceState(null, '', location.pathname);
+      if (allVideos.some(v => v.id === id)) openPlayer(id);
+      else showCustomToast(ERROR_TEXT.not_found);
     }
 
     function categoryList() {
@@ -468,11 +546,13 @@
       const thumb = !pdf && v.thumbnail
         ? `<img src="${escapeHtml(v.thumbnail)}" alt="" loading="lazy" referrerpolicy="${v.thumbnail.includes('drive.google.com') ? 'no-referrer' : 'strict-origin-when-cross-origin'}" class="cover-img absolute inset-0 w-full h-full object-cover" onerror="this.remove()">`
         : '';
+      const fav = isFav(v.id);
       return `
-        <button type="button" data-video-id="${escapeHtml(v.id)}" class="card text-left bg-white border border-line rounded-xl sm:rounded-2xl overflow-hidden flex flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-600/25">
+        <div class="card relative bg-white border border-line rounded-xl sm:rounded-2xl overflow-hidden flex flex-col">
+        <button type="button" data-video-id="${escapeHtml(v.id)}" class="text-left flex flex-col flex-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-brand-600/25">
           <div class="relative aspect-video overflow-hidden ${pdf ? 'bg-pdf-bg' : 'bg-brand-50'}">
             <div class="absolute inset-0 p-2.5 sm:p-4 flex flex-col justify-between">
-              <span class="text-[8px] sm:text-[10px] font-semibold tracking-[.12em] sm:tracking-[.14em] truncate ${pdf ? 'text-pdf-fg/70' : 'text-[#3A4E7A]'}">${pdf ? 'WIRING DIAGRAM' : escapeHtml(brandOf(v.title))}</span>
+              <span class="text-[8px] sm:text-[10px] font-semibold tracking-[.12em] sm:tracking-[.14em] truncate pr-8 sm:pr-10 ${pdf ? 'text-pdf-fg/70' : 'text-[#3A4E7A]'}">${pdf ? 'WIRING DIAGRAM' : escapeHtml(brandOf(v.title))}</span>
               <span class="text-[17px] sm:text-[30px] font-bold leading-none tracking-tight break-all line-clamp-2 pr-8 sm:pr-0 ${pdf ? 'text-pdf-fg' : 'text-brand-900'}">${escapeHtml(code)}</span>
             </div>
             ${thumb}
@@ -487,7 +567,12 @@
               <span class="hidden sm:inline shrink-0 font-medium ${pdf ? 'text-pdf-fg' : 'text-brand-600'}">${pdf ? 'แผนผัง PDF' : 'วิดีโอ'}</span>
             </div>
           </div>
-        </button>`;
+        </button>
+        <button type="button" data-fav="${escapeHtml(v.id)}" aria-pressed="${fav}" aria-label="${fav ? 'นำออกจากที่บันทึกไว้' : 'บันทึกไว้'}"
+          class="absolute top-1 right-1 sm:top-2 sm:right-2 w-9 h-9 rounded-full flex items-center justify-center">
+          <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 shadow-sm flex items-center justify-center ${fav ? 'text-amber-400' : 'text-[#98A2B3]'}"><i class="${fav ? 'fas' : 'far'} fa-star text-[12px] sm:text-[13px]"></i></span>
+        </button>
+        </div>`;
     }
 
     function renderVideos(videos) {
@@ -550,6 +635,8 @@
       $('playingTitle').innerText = video ? cleanTitle(video.title) : '';
       $('playingKind').innerText = pdf ? 'แผนผัง PDF' : 'วิดีโอ';
       $('openExternal').classList.add('hidden'); $('openExternal').classList.remove('inline-flex');
+      currentVideoId = videoId;
+      renderPlayerFav();
       if (!history.state?.player) history.pushState({ player: videoId }, '');
       wrapper.classList.toggle('aspect-video', !pdf);
       wrapper.classList.toggle('h-full', pdf);
@@ -582,6 +669,23 @@
       pushRecent(videoId);
     }
 
+    function renderPlayerFav() {
+      const on = currentVideoId && isFav(currentVideoId);
+      $('playerFav').innerHTML = `<i class="${on ? 'fas text-amber-400' : 'far'} fa-star"></i>`;
+      $('playerFav').setAttribute('aria-label', on ? 'นำออกจากที่บันทึกไว้' : 'บันทึกไว้');
+    }
+    async function shareCurrent() {
+      const v = allVideos.find(x => x.id === currentVideoId);
+      if (!v) return;
+      const url = videoLink(v.id);
+      const title = cleanTitle(v.title);
+      if (navigator.share) {
+        try { await navigator.share({ title, text: `${title} — CK Technical`, url }); return; } catch (e) { if (e?.name === 'AbortError') return; }
+      }
+      try { await navigator.clipboard.writeText(url); showCustomToast('คัดลอกลิงก์แล้ว', 'ok'); }
+      catch (_) { window.prompt('คัดลอกลิงก์นี้', url); }
+    }
+
     // ปุ่มปิด/Esc → ย้อนประวัติ (ปุ่ม Back ของมือถือจะปิดตัวเล่นแทนการออกจากเว็บ)
     function requestClosePlayer() {
       if (history.state?.player) history.back(); else closePlayer();
@@ -591,7 +695,9 @@
       $('playerOverlay').style.display = 'none';
       $('videoWrapper').innerHTML = '';
       document.body.style.overflow = '';
+      currentVideoId = null;
       renderRecent();
+      filterVideos(); // อัปเดตดาวบนการ์ด
     }
 
     // ---------- Events ----------
@@ -602,9 +708,12 @@
     $('confirmLogoutBtn').addEventListener('click', executeLogout);
     $('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmModal(); });
     $('closePlayerBtn').addEventListener('click', requestClosePlayer);
+    $('playerFav').addEventListener('click', () => { if (currentVideoId) { toggleFav(currentVideoId); renderPlayerFav(); } });
+    $('playerShare').addEventListener('click', shareCurrent);
     $('searchClear').addEventListener('click', () => { $('searchInput').value = ''; filterVideos(); $('searchInput').focus(); });
     $('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.target.blur(); scrollToResults(); } });
     $('recentList').addEventListener('click', e => { const c = e.target.closest('[data-video-id]'); if (c) openPlayer(c.dataset.videoId); });
+    $('favList').addEventListener('click', e => { const c = e.target.closest('[data-video-id]'); if (c) openPlayer(c.dataset.videoId); });
     $('recentClear').addEventListener('click', () => { setRecent([]); renderRecent(); });
     $('toTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     let ticking = false;
@@ -631,6 +740,8 @@
     $('typeFilter').addEventListener('click', pickType);
     $('typeFilterMobile').addEventListener('click', pickType);
     $('videoGrid').addEventListener('click', e => {
+      const favBtn = e.target.closest('[data-fav]');
+      if (favBtn) { toggleFav(favBtn.dataset.fav); filterVideos(); return; }
       const card = e.target.closest('[data-video-id]');
       if (card) openPlayer(card.dataset.videoId);
     });
@@ -640,10 +751,42 @@
       else if (!$('confirmModal').classList.contains('hidden')) closeConfirmModal();
     });
 
+    // ---------- ติดตั้งเป็นแอป ----------
+    let installEvent = null;
+    const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isMobile = () => window.matchMedia('(max-width: 1023px)').matches && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    function installDismissed() { try { return Number(localStorage.getItem('ck_install_dismissed') || 0) > Date.now(); } catch (_) { return false; } }
+    function renderInstall() {
+      const show = !isStandalone() && isMobile() && !installDismissed() && (installEvent || isIOS());
+      $('installBanner').classList.toggle('hidden', !show);
+      $('installBanner').classList.toggle('flex', !!show);
+    }
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvent = e; renderInstall(); });
+    window.addEventListener('appinstalled', () => { installEvent = null; renderInstall(); showCustomToast('ติดตั้งแล้ว เปิดจากไอคอน CK ได้เลย', 'ok'); });
+    $('installBtn').addEventListener('click', async () => {
+      if (installEvent) {
+        installEvent.prompt();
+        await installEvent.userChoice.catch(() => {});
+        installEvent = null; renderInstall();
+      } else {
+        $('iosHelp').classList.remove('hidden'); $('iosHelp').classList.add('flex');
+      }
+    });
+    $('installDismiss').addEventListener('click', () => {
+      try { localStorage.setItem('ck_install_dismissed', String(Date.now() + 30 * 864e5)); } catch (_) {}
+      renderInstall();
+    });
+    const closeIosHelp = () => { $('iosHelp').classList.add('hidden'); $('iosHelp').classList.remove('flex'); };
+    $('iosHelpClose').addEventListener('click', closeIosHelp);
+    $('iosHelp').addEventListener('click', e => { if (e.target === e.currentTarget) closeIosHelp(); });
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+    renderInstall();
+
     // ---------- เริ่มต้น: ล็อกอินค้างไว้อยู่ไหม ----------
     (async function boot() {
       const r = await api('/api/me');
-      if (r.ok) showMain(r.data.name);
+      if (r.ok) showMain(r.data);
       else loadStats();
       document.body.classList.remove('booting');
       if (!r.ok) $('custCode').focus();

@@ -45,5 +45,5 @@ export async function onRequestPost({ request, env, waitUntil }) {
     user_agent: (request.headers.get('User-Agent') || '').slice(0, 400),
   }).catch(err => console.error('[login] log failed', err)));
 
-  return json({ name: customer.name }, 200, { 'Set-Cookie': sessionCookie(token) });
+  return json({ id: customer.id, name: customer.name }, 200, { 'Set-Cookie': sessionCookie(token) });
 }

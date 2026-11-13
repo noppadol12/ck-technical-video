@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="/styles.css" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <style>
     body { overflow-x: clip; background-color: #F6F8FB; font-family: 'Anuphan', system-ui, sans-serif; }
     body.booting #loginView, body.booting #appView { visibility: hidden; }
@@ -54,9 +56,7 @@
   <!-- ========================= LOGIN ========================= -->
   <div id="loginView" class="min-h-screen flex items-center justify-center px-4">
     <form id="loginForm" class="bg-white w-full max-w-sm rounded-3xl shadow-soft border border-slate-100 p-8" novalidate>
-      <div class="w-14 h-14 bg-brand-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5">
-        <i class="fas fa-user-shield text-xl"></i>
-      </div>
+      <img src="/icons/logo.png" alt="CK Aircond" width="64" height="73" class="w-16 h-auto mx-auto mb-5">
       <h1 class="text-2xl font-bold text-center tracking-tight">หลังบ้าน CK Technical</h1>
       <p class="text-sm text-slate-500 text-center mt-1 mb-8">สำหรับแอดมินเท่านั้น</p>
       <label class="block text-sm font-medium mb-1.5" for="loginEmail">อีเมล</label>
@@ -72,7 +72,7 @@
     <header class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-30">
       <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="bg-brand-600 text-white w-9 h-9 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-play text-sm ml-0.5"></i></div>
+          <img src="/icons/logo.png" alt="CK Aircond" width="36" height="41" class="w-9 h-auto shrink-0">
           <div class="min-w-0">
             <div class="font-bold tracking-tight leading-tight">CK Technical · หลังบ้าน</div>
             <div class="text-xs text-slate-500 truncate"><span id="adminName"></span> · <span id="adminRole"></span></div>
@@ -463,12 +463,39 @@
             <span>ดูวิดีโอ ${c.total_views} ครั้ง</span>
           </div>
         </div>
-        <div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 shrink-0">
-          <button data-action="customer-copy" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-brand-100 text-brand-700 hover:bg-brand-50 font-medium" title="คัดลอกรหัสลูกค้า"><i class="far fa-copy mr-1"></i>คัดลอก<span class="hidden sm:inline">รหัส</span></button>
-          <button data-action="customer-edit" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200 font-medium"><i class="fas fa-pen mr-1"></i>แก้ไข</button>
-          <button data-action="customer-toggle" data-id="${esc(c.id)}" class="px-3 py-2 rounded-xl text-sm font-medium ${c.active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}">${c.active ? '<i class="fas fa-ban mr-1"></i>ปิดสิทธิ์' : '<i class="fas fa-check mr-1"></i>เปิดสิทธิ์'}</button>
+        <div class="grid grid-cols-4 sm:flex sm:flex-wrap gap-2 shrink-0">
+          <button data-action="customer-line" data-id="${esc(c.id)}" class="px-2 sm:px-3 py-2 rounded-xl text-sm bg-[#06C755]/10 text-[#05A648] hover:bg-[#06C755]/20 font-medium" title="ส่งรหัสทาง LINE"><i class="fab fa-line mr-1"></i>LINE</button>
+          <button data-action="customer-copy" data-id="${esc(c.id)}" class="px-2 sm:px-3 py-2 rounded-xl text-sm bg-brand-100 text-brand-700 hover:bg-brand-50 font-medium" title="คัดลอกรหัสลูกค้า"><i class="far fa-copy mr-1"></i>คัดลอก<span class="hidden sm:inline">รหัส</span></button>
+          <button data-action="customer-edit" data-id="${esc(c.id)}" class="px-2 sm:px-3 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200 font-medium"><i class="fas fa-pen mr-1"></i>แก้ไข</button>
+          <button data-action="customer-toggle" data-id="${esc(c.id)}" class="px-2 sm:px-3 py-2 rounded-xl text-sm font-medium ${c.active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}">${c.active ? '<i class="fas fa-ban mr-1"></i>ปิดสิทธิ์' : '<i class="fas fa-check mr-1"></i>เปิดสิทธิ์'}</button>
         </div>
       </div>`).join('') : empty(state.customers.length ? 'ไม่พบลูกค้าที่ตรงกับเงื่อนไข' : 'ยังไม่มีลูกค้า', 'fa-users');
+  }
+
+  // เปิด LINE พร้อมข้อความ (มือถือ: เปิดแอป LINE ให้เลือกแชต · คอม: หน้าแชร์ของ LINE)
+  function sendLine(text) {
+    window.open(`https://line.me/R/share?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  }
+  const videoLink = v => `${location.origin}/?v=${encodeURIComponent(v.id)}`;
+  function videoShare(v) {
+    if (!v) return;
+    const link = videoLink(v);
+    const msg = `${v.title}\nดูวิดีโอ: ${link}\n(เข้าสู่ระบบด้วยรหัสลูกค้าของท่าน)`;
+    openModal('แชร์ลิงก์วิดีโอ', `
+      <p class="text-sm text-slate-500 mb-2">ลูกค้ากดลิงก์แล้วใส่รหัส ระบบจะเปิดเรื่องนี้ให้ทันที</p>
+      <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 mb-4">
+        <div class="font-medium text-sm mb-1 line-clamp-2">${esc(v.title)}</div>
+        <div class="text-xs font-mono text-slate-500 break-all">${esc(link)}</div>
+      </div>
+      ${v.is_published ? '' : '<p class="text-sm text-amber-700 bg-amber-50 rounded-xl p-3 mb-4"><i class="fas fa-eye-slash mr-1.5"></i>เรื่องนี้ซ่อนอยู่ ลูกค้าจะเปิดไม่ได้จนกว่าจะกดแสดง</p>'}
+      <div class="grid grid-cols-2 gap-3">
+        <button data-share="copy" class="py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-medium btn-press"><i class="far fa-copy mr-2"></i>คัดลอกลิงก์</button>
+        <button data-share="line" class="py-3.5 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white font-medium btn-press"><i class="fab fa-line mr-2"></i>ส่งทาง LINE</button>
+      </div>`);
+    $('modalBody').querySelector('[data-share="copy"]').addEventListener('click', async () => {
+      if (await copyText(link)) toast('คัดลอกลิงก์แล้ว'); else toast('คัดลอกไม่สำเร็จ', 'err');
+    });
+    $('modalBody').querySelector('[data-share="line"]').addEventListener('click', () => sendLine(msg));
   }
 
   function lineMessage(c) {
@@ -545,7 +572,11 @@
         <p class="font-mono text-2xl font-bold tracking-wide mt-1">${esc(c.code)}</p>
       </div>
       <pre class="bg-slate-50 rounded-2xl p-4 text-sm whitespace-pre-wrap font-sans mb-4">${esc(msg)}</pre>
-      <button data-action="copy-created" class="w-full py-3.5 rounded-xl bg-[#00B900] hover:bg-[#00A000] text-white font-medium btn-press"><i class="fab fa-line mr-2"></i>คัดลอกข้อความไปส่ง LINE</button>`);
+      <div class="grid grid-cols-2 gap-3">
+        <button data-action="copy-created" class="py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-medium btn-press"><i class="far fa-copy mr-2"></i>คัดลอกข้อความ</button>
+        <button data-action="line-created" class="py-3.5 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white font-medium btn-press"><i class="fab fa-line mr-2"></i>ส่งทาง LINE</button>
+      </div>`);
+    $('modalBody').querySelector('[data-action="line-created"]').addEventListener('click', () => sendLine(msg));
     $('modalBody').querySelector('[data-action="copy-created"]').addEventListener('click', async () => {
       if (await copyText(msg)) toast('คัดลอกแล้ว วางในแชต LINE ได้เลย'); else toast('คัดลอกไม่สำเร็จ', 'err');
     });
@@ -614,6 +645,7 @@
         </div>
         <div class="flex gap-1 sm:gap-1.5 shrink-0 w-full sm:w-auto justify-end border-t border-slate-100 pt-2 sm:border-0 sm:pt-0">
           ${v.bunny_status === 'failed' && v.source === 'drive' && !v.is_document ? `<button data-action="video-migrate" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-brand-50 text-brand-600" title="ลองย้ายไป Bunny อีกครั้ง"><i class="fas fa-rotate-right"></i></button>` : ''}
+          <button data-action="video-share" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="แชร์ลิงก์ให้ลูกค้า"><i class="fas fa-share-nodes"></i></button>
           <button data-action="video-publish" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="${v.is_published ? 'ซ่อนจากลูกค้า' : 'แสดงให้ลูกค้า'}"><i class="fas ${v.is_published ? 'fa-eye' : 'fa-eye-slash'}"></i></button>
           <button data-action="video-edit" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="แก้ไข"><i class="fas fa-pen"></i></button>
           ${isOwner() ? `<button data-action="video-delete" data-id="${esc(v.id)}" class="w-9 h-9 rounded-xl hover:bg-red-50 text-red-500" title="ลบ"><i class="fas fa-trash"></i></button>` : ''}
@@ -1075,6 +1107,8 @@
         return c ? customerForm(c) : toast(ERR.not_found, 'err');
       }
       case 'customer-copy': return (await copyText(cust().code)) ? toast(`คัดลอกรหัส ${cust().code} แล้ว`) : toast('คัดลอกไม่สำเร็จ', 'err');
+      case 'customer-line': return cust() && sendLine(lineMessage(cust()));
+      case 'video-share': return videoShare(vid());
       case 'customer-toggle': return toggleCustomer(cust());
       case 'customer-reset': return resetCustomer(id);
       case 'video-new': if (!state.categories.length) { const r = await api('/api/admin/categories'); if (r.ok) state.categories = r.data.categories; } return videoForm(null);
