@@ -527,7 +527,7 @@
           ${field('บริษัท', `<input name="company" maxlength="160" class="${inputCls}" value="${esc(c?.company)}">`)}
         </div>
         ${field('รหัสเข้าชม', `<input name="code" maxlength="64" autocapitalize="characters" spellcheck="false" class="${inputCls} font-mono uppercase" value="${esc(c?.code)}" placeholder="${isNew ? 'เว้นว่างให้ระบบสร้างให้' : ''}">`,
-          isNew ? 'เว้นว่าง: ใช้ CK-เบอร์โทร ถ้ามีเบอร์ ไม่งั้นสุ่ม 6 หลัก · ใช้ได้ A-Z 0-9 - _ .' : 'เปลี่ยนรหัสแล้ว ลูกค้าต้องใช้รหัสใหม่ในการล็อกอินครั้งต่อไป')}
+          isNew ? 'เว้นว่าง: ใช้ CK-เบอร์โทร ถ้ามีเบอร์ ไม่งั้นสุ่ม 6 หลัก · ใช้ได้ A-Z 0-9 - _ .' : 'เปลี่ยนรหัสแล้ว เครื่องที่ล็อกอินด้วยรหัสเก่าจะหลุดทันที ลูกค้าต้องใส่รหัสใหม่')}
         ${field('ใช้ได้ถึงวันที่', `<input name="expires_at" type="date" class="${inputCls}" value="${isNew ? plusYearInput() : toInputDate(c.expires_at)}">`, 'เว้นว่าง = ไม่มีวันหมดอายุ')}
         ${field('หมายเหตุ', `<textarea name="note" rows="2" maxlength="1000" class="${inputCls}">${esc(c?.note)}</textarea>`)}
         ${isNew ? '' : `
@@ -739,7 +739,7 @@
     if (window.tus) return Promise.resolve();
     tusLoading ||= new Promise((resolve, reject) => {
       const sc = document.createElement('script');
-      sc.src = 'https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js';
+      sc.src = '/vendor/tus-4.3.1.min.js';
       sc.onload = resolve; sc.onerror = () => { tusLoading = null; reject(new Error('load')); };
       document.head.appendChild(sc);
     });

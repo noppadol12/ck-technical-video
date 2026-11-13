@@ -16,6 +16,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const d = db(env);
     let v = await d.one(`videos?bunny_video_id=eq.${q(guid)}&select=${PENDING_FIELDS}`);
     if (!v) {
+      // ไม่มีงานย้ายค้างอยู่ → ไม่ต้องถาม Bunny (กันคนนอกยิง webhook ปลอมให้เราเรียก Bunny รัวๆ)
+      const waiting = await d.one('videos?bunny_status=eq.fetching&bunny_video_id=is.null&select=id&limit=1');
+      if (!waiting) return;
       // วิดีโอที่ย้ายจาก Drive: Bunny ตั้งชื่อชั่วคราวเป็น ck-migrate-<id ของเรา>
       const bv = await bunny.getVideo(env, guid);
       const m = String(bv?.title || '').match(/^ck-migrate-([0-9a-f-]{36})$/i);

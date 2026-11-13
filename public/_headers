@@ -1,8 +1,10 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: frame-ancestors 'self' https://ckaircond.com https://*.ckaircond.com
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://*.b-cdn.net; frame-src https://player.mediadelivery.net https://iframe.mediadelivery.net https://drive.google.com; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https://ckaircond.com https://*.ckaircond.com
 
 /
   Cache-Control: no-cache
@@ -13,7 +15,8 @@
 /admin/*
   Cache-Control: no-cache
   X-Frame-Options: DENY
-  Content-Security-Policy: frame-ancestors 'none'
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://*.b-cdn.net; connect-src 'self' https://video.bunnycdn.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 
 /sw.js
   Cache-Control: no-cache
@@ -25,3 +28,6 @@
 
 /icons/*
   Cache-Control: public, max-age=604800
+
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable

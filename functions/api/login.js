@@ -1,7 +1,8 @@
-import { db, q } from '../../lib/supabase.js';
+import { db } from '../../lib/supabase.js';
 import { findCustomerByCode, customerStatus } from '../../lib/auth.js';
 import { signSession, sessionCookie } from '../../lib/session.js';
 import { json, fail, clientIp, normCode } from '../../lib/http.js';
+import { rateKey, hit, forgive, sweep } from '../../lib/ratelimit.js';
 
 // กันเดารหัส: ใส่ผิดเกิน MAX_FAILS ครั้งใน WINDOW_MIN นาที (ต่อ IP) → รอก่อน
 const MAX_FAILS = 5;
@@ -16,10 +17,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   const d = db(env);
   const ip = clientIp(request);
-  const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
-
-  const fails = await d.count(`login_attempts?ip=eq.${q(ip)}&created_at=gte.${q(since)}`);
-  if (fails >= MAX_FAILS) {
+  const attempt = await hit(d, rateKey(request), MAX_FAILS, WINDOW_MIN);
+  if (attempt.blocked) {
     return fail(429, 'too_many_attempts', { 'Retry-After': String(WINDOW_MIN * 60) });
   }
 
@@ -27,14 +26,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const status = customerStatus(customer);
 
   if (status !== 'ok') {
-    await d.insert('login_attempts', { ip });
-    // เก็บกวาดรายการเก่าเป็นครั้งคราว
-    if (Math.random() < 0.05) {
-      waitUntil(d.remove(`login_attempts?created_at=lt.${q(new Date(Date.now() - 86_400_000).toISOString())}`).catch(() => {}));
-    }
+    sweep(d, waitUntil); // เก็บกวาดรายการเก่าเป็นครั้งคราว
     return fail(401, status === 'expired' ? 'code_expired' : 'invalid_code');
   }
 
+  waitUntil(forgive(d, attempt.id).catch(() => {}));
   const token = await signSession(env, customer);
 
   waitUntil(d.insert('login_logs', {
