@@ -24,6 +24,10 @@ export async function onRequest(context) {
     console.error(`[api] ${request.method} ${new URL(request.url).pathname}:`, err?.stack || err);
     return fail(500, 'server_error');
   }
+  // ไม่มี API นี้ / ใช้ method ผิด → Pages จะตกไปส่งหน้าเว็บ (index.html) แทน ให้ตอบเป็น error JSON
+  if ((res.headers.get('Content-Type') || '').includes('text/html')) {
+    return fail(404, 'not_found');
+  }
   res = new Response(res.body, res); // header ของ response บางชนิดแก้ไม่ได้
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('X-Frame-Options', 'DENY');
