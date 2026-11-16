@@ -1,7 +1,7 @@
 # CK Technical Video
 
 ระบบวิดีโอเทคนิคสำหรับลูกค้า ห้างหุ้นส่วนจำกัด ซี.เค.แอร์คอนด์
-Cloudflare Pages (หน้าเว็บ + API) · Supabase (ฐานข้อมูล) · Bunny Stream (วิดีโอ) · Google Drive (PDF)
+Cloudflare Pages (หน้าเว็บ + API) · Supabase (ฐานข้อมูล) · Bunny Stream (วิดีโอ) · Google Drive (PDF) · CK Wiring (แผนผังวงจร)
 
 | เฟส | คู่มือ | สถานะ |
 | --- | --- | --- |
@@ -9,11 +9,12 @@ Cloudflare Pages (หน้าเว็บ + API) · Supabase (ฐานข้�
 | 2 API + หน้าลูกค้า | [docs/PHASE2.md](docs/PHASE2.md) | เสร็จ |
 | 4 หลังบ้านแอดมิน (`/admin`) | [docs/PHASE4.md](docs/PHASE4.md) | เสร็จ |
 | 3 ย้ายวิดีโอไป Bunny Stream | [docs/PHASE3.md](docs/PHASE3.md) | เสร็จ |
+| 5 แผนผังวงจร (CK Wiring) | [docs/PHASE5.md](docs/PHASE5.md) | รอรัน `phase5.sql` |
 
 ## โครงสร้าง
 
 ```
-public/            หน้าเว็บลูกค้า (index.html), หลังบ้าน (admin/), styles.css, _headers
+public/            หน้าเว็บลูกค้า (index.html), หลังบ้าน (admin/), โปรแกรมวาด (admin/wiring/), ตัววาด/หน้าดูแผนผัง (wiring/), styles.css, _headers
 functions/api/     API บน Cloudflare Pages Functions
 lib/               โค้ดใช้ร่วมกัน (session, ฐานข้อมูล, ตรวจสิทธิ์)
 supabase/          SQL สร้างตาราง
@@ -32,3 +33,5 @@ styles/            ต้นฉบับ Tailwind (build เป็น public/sty
 | `POST /api/videos/:id/play` | ลิงก์เล่นวิดีโอ + บันทึกการดู |
 | `/api/admin/*` | หลังบ้าน: login, me, customers, videos (+ upload, migrate, sync), categories, reports, actions |
 | `POST /api/webhooks/bunny` | Bunny แจ้งสถานะแปลงไฟล์ (ระบบไปตรวจกับ Bunny API ซ้ำก่อนเชื่อ) |
+| `/api/admin/wiring/*` | หลังบ้าน: แผนผังวงจร (สร้าง, บันทึก, เผยแพร่, รูป, คลังอุปกรณ์) — ดู [docs/PHASE5.md](docs/PHASE5.md) |
+| `GET /api/diagrams/:id` · `GET /api/wiring/assets/:id` | แผนผังที่เผยแพร่ + รูป สำหรับลูกค้า |

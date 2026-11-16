@@ -3,6 +3,7 @@ import { currentCustomer } from '../../lib/auth.js';
 import { clearCookie } from '../../lib/session.js';
 import { json, fail } from '../../lib/http.js';
 import { bunnyThumbnail, isDocument } from '../../lib/bunny.js';
+import { missingTable } from '../../lib/wiring.js';
 
 const DEFAULT_CATEGORY = 'ทั่วไป';
 
@@ -30,6 +31,28 @@ export async function onRequestGet({ request, env }) {
     categoryOrder: v.category?.sort_order ?? 9999,
     thumbnail: thumbnailOf(env, v),
   }));
+
+  // แผนผังวงจรที่วาดในหลังบ้าน แสดงในกลุ่มเดียวกับแผนผัง PDF
+  // ถ้าดึงไม่ได้ (เช่น ยังไม่ได้รัน phase5.sql) ให้แสดงวิดีโอตามปกติ ไม่ให้หน้าลูกค้าพัง
+  try {
+    const diagrams = await db(env).select(
+      'diagrams?select=id,title,sort_order,category:categories(name,sort_order)&is_published=eq.true&order=sort_order.asc,title.asc',
+    );
+    for (const g of diagrams) {
+      videos.push({
+        id: g.id,
+        title: g.title,
+        description: null,
+        category: g.category?.name || DEFAULT_CATEGORY,
+        kind: 'pdf',
+        diagram: true,
+        categoryOrder: g.category?.sort_order ?? 9999,
+        thumbnail: null,
+      });
+    }
+  } catch (err) {
+    if (!missingTable(err)) console.error('[videos] diagrams:', err);
+  }
 
   return json({ videos });
 }
