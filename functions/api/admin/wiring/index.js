@@ -7,8 +7,25 @@ import { DIAGRAM_LIST_FIELDS, DIAGRAM_FIELDS, shapeDiagram, diagramData, missing
 // รายการแผนผังทั้งหมด (ไม่รวมข้อมูลภาพ)
 export async function onRequestGet({ env }) {
   try {
-    const rows = await db(env).select(`diagrams?select=${DIAGRAM_LIST_FIELDS}&order=updated_at.desc`);
-    return json({ diagrams: rows.map(shapeDiagram) });
+    const d = db(env);
+    const [rows, logs] = await Promise.all([
+      d.select(`diagrams?select=${DIAGRAM_LIST_FIELDS}&order=updated_at.desc`),
+      d.select('watch_logs?select=diagram_id,customer_id&diagram_id=not.is.null'),
+    ]);
+    // ยอดเปิดดูของลูกค้า (ทั้งหมด + จำนวนคน)
+    const stats = new Map();
+    for (const l of logs) {
+      const s = stats.get(l.diagram_id) || { views: 0, viewers: new Set() };
+      s.views++;
+      if (l.customer_id) s.viewers.add(l.customer_id);
+      stats.set(l.diagram_id, s);
+    }
+    return json({
+      diagrams: rows.map(r => {
+        const s = stats.get(r.id);
+        return { ...shapeDiagram(r), total_views: s?.views ?? 0, unique_viewers: s?.viewers.size ?? 0 };
+      }),
+    });
   } catch (err) {
     if (missingTable(err)) return fail(503, 'not_ready');
     throw err;

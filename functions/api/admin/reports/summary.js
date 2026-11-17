@@ -15,6 +15,10 @@ export async function onRequestGet({ env }) {
     d.select('videos?select=id,is_published'),
   ]);
 
+  // แผนผังวงจร (CK Wiring) — ถ้ายังไม่ได้รัน phase5.sql ให้นับเป็น 0
+  let diagrams = [];
+  try { diagrams = await d.select('diagrams?select=is_published'); } catch (_) { /* ยังไม่มีตาราง */ }
+
   const act = new Map(activity.map(a => [a.id, a]));
   const in30 = Date.now() + 30 * 86_400_000;
   const withState = customers.map(c => ({ ...c, state: customerState(c), last_login_at: act.get(c.id)?.last_login_at ?? null }));
@@ -36,6 +40,7 @@ export async function onRequestGet({ env }) {
       disabled: withState.filter(c => c.state === 'disabled').length,
     },
     videos: { total: videos.length, published: videos.filter(v => v.is_published).length },
+    diagrams: { total: diagrams.length, published: diagrams.filter(g => g.is_published).length },
     logins_7d: logins7,
     views_7d: views7,
     views_30d: views30.length,

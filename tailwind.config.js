@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./public/**/*.html'],
+  // หน้าโปรแกรมวาดแผนผังมี CSS ของตัวเอง ไม่ใช้ Tailwind
+  content: ['./public/**/*.html', '!./public/admin/wiring/**', '!./public/wiring/**'],
   theme: {
     extend: {
       fontFamily: { sans: ['Anuphan', 'system-ui', 'sans-serif'] },
