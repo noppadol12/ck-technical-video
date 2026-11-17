@@ -1121,8 +1121,9 @@ function toast(t,icon='check'){const el=$('#toast');el.innerHTML=ic(icon,'sm')+'
   if(pendingAssets.size)uploadAssets().catch(()=>{});
   const l=await API(API_BASE);
   if(!l.ok){setSave('โหลดรายการงานไม่สำเร็จ',true);return;}
-  const list=l.data.diagrams||[],last=lsGet('lastDoc');
-  const target=list.find(d=>d.id===last)||list[0];
+  const list=l.data.diagrams||[],want=new URLSearchParams(location.search).get('id')||lsGet('lastDoc');
+  const target=list.find(d=>d.id===want)||list[0];
+  if(location.search)history.replaceState(null,'',location.pathname);
   if(target)await openDocId(target.id);else await newDocument();
 })();
 </script>

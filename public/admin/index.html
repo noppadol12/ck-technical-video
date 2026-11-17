@@ -166,6 +166,14 @@
           </div>
         </div>
         <div id="videoList"></div>
+
+        <div id="diagramSection" class="hidden pt-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h3 class="font-semibold text-slate-800"><i class="fas fa-diagram-project mr-2 text-pdf-fg"></i>แผนผังวงจร <span id="diagramCount" class="text-sm font-normal text-slate-500"></span></h3>
+            <a href="/admin/wiring/" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-medium btn-press"><i class="fas fa-pen-ruler mr-1.5"></i>เปิดโปรแกรมวาด</a>
+          </div>
+          <div id="diagramList" class="space-y-3"></div>
+        </div>
       </section>
 
       <!-- Categories -->
@@ -425,8 +433,9 @@
     $('statCards').innerHTML =
       card('fa-users', 'bg-emerald-50 text-emerald-600', s.customers.active, 'ลูกค้าที่ใช้งานได้', `หมดอายุ ${s.customers.expired} · ปิดสิทธิ์ ${s.customers.disabled}`) +
       card('fa-right-to-bracket', 'bg-blue-50 text-blue-600', s.logins_7d, 'เข้าระบบ 7 วันล่าสุด') +
-      card('fa-play', 'bg-purple-50 text-purple-600', s.views_7d, 'ดูวิดีโอ 7 วันล่าสุด', `30 วัน: ${s.views_30d}`) +
-      card('fa-film', 'bg-amber-50 text-amber-600', s.videos.published, 'วิดีโอที่แสดงอยู่', `ทั้งหมด ${s.videos.total}`);
+      card('fa-play', 'bg-purple-50 text-purple-600', s.views_7d, 'เปิดดู 7 วันล่าสุด', `30 วัน: ${s.views_30d} · รวมวิดีโอและแผนผัง`) +
+      card('fa-film', 'bg-amber-50 text-amber-600', s.videos.published + (s.diagrams?.published || 0), 'วิดีโอ + แผนผังที่แสดงอยู่',
+        `วิดีโอ ${s.videos.published} · แผนผังวงจร ${s.diagrams?.published || 0} · ทั้งหมด ${s.videos.total + (s.diagrams?.total || 0)}`);
 
     const max = Math.max(1, ...s.top_videos_30d.map(t => t.views));
     $('topVideos').innerHTML = s.top_videos_30d.length ? s.top_videos_30d.map((t, i) => `
@@ -491,8 +500,8 @@
   function videoShare(v) {
     if (!v) return;
     const link = videoLink(v);
-    const msg = `${v.title}\nดูวิดีโอ: ${link}\n(เข้าสู่ระบบด้วยรหัสลูกค้าของท่าน)`;
-    openModal('แชร์ลิงก์วิดีโอ', `
+    const msg = `${v.title}\n${v.diagram ? 'ดูแผนผังวงจร' : 'ดูวิดีโอ'}: ${link}\n(เข้าสู่ระบบด้วยรหัสลูกค้าของท่าน)`;
+    openModal(v.diagram ? 'แชร์ลิงก์แผนผังวงจร' : 'แชร์ลิงก์วิดีโอ', `
       <p class="text-sm text-slate-500 mb-2">ลูกค้ากดลิงก์แล้วใส่รหัส ระบบจะเปิดเรื่องนี้ให้ทันที</p>
       <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 mb-4">
         <div class="font-medium text-sm mb-1 line-clamp-2">${esc(v.title)}</div>
@@ -613,9 +622,10 @@
   // ---------------------------------------------------------------- videos
   async function loadVideos() {
     $('videoList').innerHTML = loading();
-    const [rv, rc] = await Promise.all([api('/api/admin/videos'), api('/api/admin/categories')]);
+    const [rv, rc, rd] = await Promise.all([api('/api/admin/videos'), api('/api/admin/categories'), api('/api/admin/wiring')]);
     if (!rv.ok) { $('videoList').innerHTML = empty(errorText(rv), 'fa-triangle-exclamation'); return; }
     state.videos = rv.data.videos;
+    state.diagrams = rd.ok ? rd.data.diagrams : [];
     if (rc.ok) state.categories = rc.data.categories;
     const sel = $('videoCategory');
     const cur = sel.value;
@@ -697,6 +707,47 @@
         </div>
       </div>`).join('') : empty(state.videos.length ? 'ไม่พบวิดีโอที่ตรงกับเงื่อนไข' : 'ยังไม่มีวิดีโอ', 'fa-film');
     renderMigratePanel();
+    renderDiagrams(term, cat);
+  }
+
+  // แผนผังวงจร (CK Wiring) — แก้ไข / เผยแพร่ ทำในโปรแกรมวาด
+  function renderDiagrams(term, cat) {
+    const all = state.diagrams || [];
+    $('diagramSection').classList.toggle('hidden', !all.length);
+    if (!all.length) return;
+    const list = all.filter(g =>
+      (!term || g.title.toLowerCase().includes(term)) &&
+      (!cat || (cat === 'none' ? g.category_id == null : String(g.category_id) === cat)));
+    $('diagramCount').textContent = `· ${list.length} จาก ${all.length} · แสดงอยู่ ${all.filter(g => g.is_published).length}`;
+    const status = g => g.is_published
+      ? (g.has_changes
+        ? '<span class="text-amber-600 font-medium"><i class="fas fa-circle-exclamation mr-1"></i>มีแก้ไขที่ลูกค้ายังไม่เห็น</span>'
+        : '<span class="text-emerald-700 font-medium"><i class="fas fa-eye mr-1"></i>แสดงให้ลูกค้า</span>')
+      : '<span class="text-amber-600 font-medium"><i class="fas fa-eye-slash mr-1"></i>ฉบับร่าง (ลูกค้ายังไม่เห็น)</span>';
+    const replaced = g => {
+      const v = g.replaces_video_id && state.videos.find(x => x.id === g.replaces_video_id);
+      return v ? `<span><i class="fas fa-arrow-right-arrow-left mr-1 text-slate-400"></i>แทน PDF: ${esc(v.title)}</span>` : '';
+    };
+    $('diagramList').innerHTML = list.length ? list.map(g => `
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-3 flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-2 ${g.is_published ? '' : 'opacity-60'}">
+        <a href="/admin/wiring/?id=${encodeURIComponent(g.id)}" class="w-24 sm:w-32 aspect-video rounded-lg sm:rounded-xl bg-pdf-bg border border-pdf-line shrink-0 flex flex-col items-center justify-center gap-1 text-pdf-fg" title="เปิดในโปรแกรมวาด">
+          <i class="fas fa-diagram-project text-xl"></i><span class="text-[10px] font-semibold tracking-wide">WIRING</span>
+        </a>
+        <div class="flex-1 min-w-0">
+          <div class="font-medium line-clamp-2 text-sm sm:text-base">${esc(g.title)}</div>
+          <div class="text-xs text-slate-500 mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
+            <span class="px-1.5 rounded bg-pdf-bg text-pdf-fg font-medium"><i class="fas fa-diagram-project mr-1"></i>แผนผังวงจร</span>
+            <span><i class="fas fa-layer-group mr-1 text-slate-400"></i>${esc(g.category || 'ทั่วไป')}</span>
+            <span><i class="fas fa-eye mr-1 text-slate-400"></i>${g.total_views} ครั้ง · ${g.unique_viewers} คน</span>
+            ${status(g)}
+            ${replaced(g)}
+          </div>
+        </div>
+        <div class="flex gap-1 sm:gap-1.5 shrink-0 w-full sm:w-auto justify-end border-t border-slate-100 pt-2 sm:border-0 sm:pt-0">
+          ${g.is_published ? `<button data-action="diagram-share" data-id="${esc(g.id)}" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500" title="แชร์ลิงก์ให้ลูกค้า"><i class="fas fa-share-nodes"></i></button>` : ''}
+          <a href="/admin/wiring/?id=${encodeURIComponent(g.id)}" class="h-9 px-3 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-sm font-medium inline-flex items-center"><i class="fas fa-pen-ruler mr-1.5"></i>เปิดในโปรแกรมวาด</a>
+        </div>
+      </div>`).join('') : empty('ไม่พบแผนผังที่ตรงกับเงื่อนไข', 'fa-diagram-project');
   }
 
   // ---------------------------------------------------------------- bunny
@@ -1161,6 +1212,7 @@
       case 'customer-copy': return (await copyText(cust().code)) ? toast(`คัดลอกรหัส ${cust().code} แล้ว`) : toast('คัดลอกไม่สำเร็จ', 'err');
       case 'customer-line': return cust() && sendLine(lineMessage(cust()));
       case 'video-share': return videoShare(vid());
+      case 'diagram-share': { const g = (state.diagrams || []).find(x => x.id === id); return g && videoShare({ ...g, diagram: true }); }
       case 'customer-toggle': return toggleCustomer(cust());
       case 'customer-reset': return resetCustomer(id);
       case 'video-new': if (!state.categories.length) { const r = await api('/api/admin/categories'); if (r.ok) state.categories = r.data.categories; } return videoForm(null);
