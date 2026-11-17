@@ -7,5 +7,9 @@ export async function onRequestGet({ env }) {
   const rows = await db(env).select('videos?select=title,category_id,category:categories(name)&is_published=eq.true&status=eq.ready');
   const pdf = rows.filter(v => isDocument(v.title, v.category?.name)).length;
   const categories = new Set(rows.map(v => v.category_id ?? 0)).size;
-  return json({ videos: rows.length - pdf, documents: pdf, categories }, 200, { 'Cache-Control': 'public, max-age=600' });
+  let diagrams = 0;
+  try {
+    diagrams = await db(env).count('diagrams?is_published=eq.true');
+  } catch (_) { /* ยังไม่ได้รัน phase5.sql */ }
+  return json({ videos: rows.length - pdf, documents: pdf + diagrams, categories }, 200, { 'Cache-Control': 'public, max-age=600' });
 }

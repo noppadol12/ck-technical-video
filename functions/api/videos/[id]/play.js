@@ -15,7 +15,7 @@ export async function onRequestPost({ request, env, params, waitUntil }) {
   const v = await d.one(
     `videos?id=eq.${q(params.id)}&is_published=eq.true&status=eq.ready&select=id,title,source,drive_file_id,bunny_video_id`,
   );
-  if (!v) return fail(404, 'not_found');
+  if (!v) return openDiagram({ d, c, id: params.id, waitUntil });
 
   let url;
   if (v.source === 'bunny' && v.bunny_video_id) url = await embedUrl(env, v.bunny_video_id);
@@ -37,4 +37,28 @@ export async function onRequestPost({ request, env, params, waitUntil }) {
   })().catch(err => console.error('[play] log failed', err)));
 
   return json({ title: v.title, url });
+}
+
+// แผนผังวงจร (CK Wiring) — เปิดในหน้าดูแผนผังของเว็บเอง
+async function openDiagram({ d, c, id, waitUntil }) {
+  let g = null;
+  try {
+    g = await d.one(`diagrams?id=eq.${q(id)}&is_published=eq.true&select=id,title`);
+  } catch (_) { /* ยังไม่ได้รัน phase5.sql */ }
+  if (!g) return fail(404, 'not_found');
+
+  const since = new Date(Date.now() - DEDUPE_MIN * 60_000).toISOString();
+  waitUntil((async () => {
+    const seen = await d.one(`watch_logs?customer_id=eq.${q(c.id)}&diagram_id=eq.${q(g.id)}&created_at=gte.${q(since)}&select=id&limit=1`);
+    if (seen) return;
+    await d.insert('watch_logs', {
+      customer_id: c.id,
+      diagram_id: g.id,
+      code_snapshot: c.code,
+      name_snapshot: c.name,
+      video_title_snapshot: `แผนผัง: ${g.title}`,
+    });
+  })().catch(err => console.error('[play] diagram log failed', err)));
+
+  return json({ title: g.title, url: `/wiring/view.html?id=${encodeURIComponent(g.id)}` });
 }

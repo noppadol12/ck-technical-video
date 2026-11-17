@@ -169,7 +169,7 @@
           <div id="typeFilter" role="tablist" class="hidden sm:inline-flex p-1 bg-white border border-line rounded-xl self-start sm:self-auto">
             <button data-type="" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium">ทั้งหมด</button>
             <button data-type="video" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium"><i class="fas fa-play text-[10px] mr-1.5"></i>วิดีโอ</button>
-            <button data-type="pdf" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium"><i class="fas fa-file-lines text-[11px] mr-1.5"></i>แผนผัง PDF</button>
+            <button data-type="pdf" class="type-pill h-8 px-3.5 rounded-lg text-[13px] font-medium"><i class="fas fa-file-lines text-[11px] mr-1.5"></i>แผนผังวงจร</button>
           </div>
         </div>
 
@@ -178,7 +178,7 @@
           <div id="typeFilterMobile" class="sm:hidden grid grid-cols-3 p-1 bg-white border border-line rounded-xl mb-2.5">
             <button data-type="" class="type-pill h-9 rounded-lg text-[13px] font-medium">ทั้งหมด</button>
             <button data-type="video" class="type-pill h-9 rounded-lg text-[13px] font-medium">วิดีโอ</button>
-            <button data-type="pdf" class="type-pill h-9 rounded-lg text-[13px] font-medium">แผนผัง PDF</button>
+            <button data-type="pdf" class="type-pill h-9 rounded-lg text-[13px] font-medium">แผนผังวงจร</button>
           </div>
           <div id="categoryChips" class="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6"></div>
         </div>
@@ -480,7 +480,7 @@
       allVideos = r.data.videos || [];
       const vids = allVideos.filter(v => v.kind !== 'pdf').length;
       const cats = new Set(allVideos.map(v => v.category)).size;
-      $('libSummary').innerText = `${vids} วิดีโอสอนติดตั้ง · ${allVideos.length - vids} แผนผังวงจร PDF · ${cats} หมวด`;
+      $('libSummary').innerText = `${vids} วิดีโอสอนติดตั้ง · ${allVideos.length - vids} แผนผังวงจร · ${cats} หมวด`;
       renderCategories();
       filterVideos();
       openPendingVideo();
@@ -564,7 +564,7 @@
             <h3 class="font-semibold text-[13px] sm:text-[15px] leading-snug line-clamp-3 sm:line-clamp-2">${escapeHtml(cleanTitle(v.title))}</h3>
             <div class="mt-auto flex items-center justify-between gap-2 text-[11px] sm:text-[12px]">
               <span class="truncate px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-[#F1F4F9] text-[#3A4352]">${escapeHtml(v.category)}</span>
-              <span class="hidden sm:inline shrink-0 font-medium ${pdf ? 'text-pdf-fg' : 'text-brand-600'}">${pdf ? 'แผนผัง PDF' : 'วิดีโอ'}</span>
+              <span class="hidden sm:inline shrink-0 font-medium ${pdf ? 'text-pdf-fg' : 'text-brand-600'}">${pdf ? 'แผนผังวงจร' : 'วิดีโอ'}</span>
             </div>
           </div>
         </button>
@@ -633,7 +633,7 @@
       const pdf = video?.kind === 'pdf';
 
       $('playingTitle').innerText = video ? cleanTitle(video.title) : '';
-      $('playingKind').innerText = pdf ? 'แผนผัง PDF' : 'วิดีโอ';
+      $('playingKind').innerText = pdf ? 'แผนผังวงจร' : 'วิดีโอ';
       $('openExternal').classList.add('hidden'); $('openExternal').classList.remove('inline-flex');
       currentVideoId = videoId;
       renderPlayerFav();
