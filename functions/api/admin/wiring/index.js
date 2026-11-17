@@ -5,11 +5,12 @@ import { readJson, text } from '../../../../lib/validate.js';
 import { DIAGRAM_LIST_FIELDS, DIAGRAM_FIELDS, shapeDiagram, diagramData, missingTable } from '../../../../lib/wiring.js';
 
 // รายการแผนผังทั้งหมด (ไม่รวมข้อมูลภาพ)
-export async function onRequestGet({ env }) {
+// ?with=data → รวมข้อมูลแผนผัง (ใช้ทำภาพตัวอย่างในหลังบ้าน)
+export async function onRequestGet({ env, request }) {
   try {
     const d = db(env);
     const [rows, logs] = await Promise.all([
-      d.select(`diagrams?select=${DIAGRAM_LIST_FIELDS}&order=updated_at.desc`),
+      d.select(`diagrams?select=${new URL(request.url).searchParams.get('with') === 'data' ? DIAGRAM_FIELDS : DIAGRAM_LIST_FIELDS}&order=updated_at.desc`),
       d.select('watch_logs?select=diagram_id,customer_id&diagram_id=not.is.null'),
     ]);
     // ยอดเปิดดูของลูกค้า (ทั้งหมด + จำนวนคน)
