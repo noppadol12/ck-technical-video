@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef0f4;--surface:#fff;--sunken:#f4f6f9;--border:#e4e7ec;--border-2:#d0d5dd;--text:#101828;--text-2:#475467;--muted:#98a2b3;
+:root{--bg:#eef0f4;--surface:#fff;--sunken:#f4f6f9;--border:#e4e7ec;--border-2:#d0d5dd;--text:#101828;--text-2:#344054;--muted:#667085;
   --accent:#2563eb;--accent-2:#1d4ed8;--accent-soft:#eef4ff;--danger:#d92d20;--danger-soft:#fef3f2;--warn:#b54708;--warn-soft:#fffaeb;--ok:#067647;
   --shadow-sm:0 1px 2px rgba(16,24,40,.06);--shadow:0 4px 12px rgba(16,24,40,.08),0 1px 3px rgba(16,24,40,.06);--shadow-lg:0 20px 48px rgba(16,24,40,.18)}
 *{box-sizing:border-box}
@@ -52,16 +52,18 @@ html,body{margin:0;height:100%;font-family:"IBM Plex Sans Thai","Noto Sans Thai"
 .pal-top{padding:12px 12px 6px}
 .search{display:flex;align-items:center;gap:7px;height:34px;padding:0 10px;border:1px solid var(--border-2);border-radius:8px;color:var(--muted);background:#fff}
 .search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.search input{border:0!important;outline:0;box-shadow:none!important;font:inherit;flex:1;min-width:0;min-height:0;padding:0;background:transparent;color:var(--text)}
+.search input[type=text]{border:0;outline:0;box-shadow:none;border-radius:0;font:inherit;flex:1;min-width:0;height:100%;min-height:0;padding:0;background:transparent;color:var(--text)}
+.search input[type=text]:focus{box-shadow:none;border:0}
+.search input::placeholder{color:var(--muted)}
 #palList{overflow:auto;padding:0 12px 24px;flex:1}
-.pal-h{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:14px 2px 8px}
+.pal-h{font-size:11.5px;font-weight:600;color:var(--text-2);letter-spacing:.04em;margin:14px 2px 8px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px 8px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font:inherit;color:var(--text-2);transition:border-color .12s,box-shadow .12s,transform .12s}
 .tile:hover{border-color:#b2ccff;box-shadow:var(--shadow);color:var(--text)}
 .tile:active{transform:scale(.98)}
 .tile-ic{width:44px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:var(--sunken)}
 .tile-ic svg{width:38px;height:26px}
-.tile-lb{font-size:11.5px;line-height:1.3;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile-lb{font-size:12px;font-weight:500;line-height:1.3;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tile-x{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:6px;display:none;align-items:center;justify-content:center;color:var(--muted);background:#fff}
 .tile:hover .tile-x{display:flex}.tile-x:hover{color:var(--danger);background:var(--danger-soft)}
 .empty{font-size:12px;color:var(--muted);padding:10px;border:1px dashed var(--border-2);border-radius:10px;line-height:1.55}
@@ -679,9 +681,10 @@ function renderPalette(){
   let s='';
   for(const[g,items]of PALETTE){const f=items.filter(([,l])=>m(l));if(!f.length)continue;s+=`<div class="pal-h">${g}</div><div class="tiles">${f.map(([k,l])=>tile(k,l)).join('')}</div>`;}
   const lib=library.filter(L=>m(L.name));
-  s+=`<div class="pal-h">คลังอุปกรณ์ของฉัน</div>`;
-  if(!library.length)s+=`<div class="empty">ยังว่างอยู่ เลือกกล่องอุปกรณ์ แล้วกด "บันทึกลงคลัง" เพื่อเก็บไว้ใช้ซ้ำ</div>`;
+  if(!q||lib.length)s+=`<div class="pal-h">คลังอุปกรณ์ของฉัน</div>`;
+  if(!library.length&&!q)s+=`<div class="empty">ยังว่างอยู่ เลือกกล่องอุปกรณ์ แล้วกด "บันทึกลงคลัง" เพื่อเก็บไว้ใช้ซ้ำ</div>`;
   else if(lib.length)s+=`<div class="tiles">${lib.map(L=>tile('lib:'+L.id,L.name,`<span class="tile-x" data-libdel="${L.id}" title="ลบออกจากคลัง">${ic('x','sm')}</span>`)).join('')}</div>`;
+  if(!s)s=`<div class="empty">ไม่พบชิ้นส่วนที่ชื่อ "${esc(q)}"</div>`;
   $('#palList').innerHTML=s;
 }
 $('#palSearch').addEventListener('input',renderPalette);
