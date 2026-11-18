@@ -28,8 +28,10 @@
   function rotDir(d, r) { if (!d) return null; const [x, y] = rotPt(...DIRV[d], r); return x < 0 ? 'L' : x > 0 ? 'R' : y < 0 ? 'U' : 'D'; }
   function compPins(it) { return it.kind === 'ground' ? { a: [0, -20, 'U'] } : { a: [-30, 0, 'L'], b: [30, 0, 'R'] }; }
   function devTerm(it, t) {
-    const same = it.terms.filter(x => x.side === t.side); const i = same.indexOf(t);
-    return { x: t.side === 'L' ? it.x : it.x + it.w, y: it.y + (it.tt ?? 60) + i * (it.ts ?? 30), dir: t.side };
+    const same = it.terms.filter(x => x.side === t.side); const i = same.indexOf(t), ts = it.ts ?? 30;
+    // ขั้วล่าง: เรียงซ้าย→ขวา อยู่กึ่งกลางขอบล่าง
+    if (t.side === 'B') return { x: snap(it.x + it.w / 2 - (same.length - 1) * ts / 2) + i * ts, y: it.y + it.h, dir: 'D' };
+    return { x: t.side === 'L' ? it.x : it.x + it.w, y: it.y + (it.tt ?? 60) + i * ts, dir: t.side === 'L' ? 'L' : 'R' };
   }
   function pinPos(ref) {
     if (!ref) return null;
@@ -102,12 +104,14 @@
     const lw = a => a.length ? Math.max(...a.map(t => estW(t.label, 12))) + 24 : 12;
     const src = asset(it.img);
     if (src) {
-      const ix0 = x + lw(Lt), ix1 = x + w - lw(Rt), iy0 = cy + 14, iy1 = y + h - 12;
+      const ix0 = x + lw(Lt), ix1 = x + w - lw(Rt), iy0 = cy + 14, iy1 = y + h - (it.terms.some(t => t.side === 'B') ? 32 : 12);
       if (ix1 - ix0 > 10 && iy1 - iy0 > 10) s += `<image href="${esc(src)}" x="${ix0}" y="${iy0}" width="${ix1 - ix0}" height="${iy1 - iy0}" preserveAspectRatio="xMidYMid meet"/>`;
     }
     for (const t of it.terms) {
       const p = devTerm(it, t);
-      s += t.side === 'L'
+      s += t.side === 'B'
+        ? `<text x="${p.x}" y="${y + h - 9}" font-size="11" fill="#222" text-anchor="middle">${esc(t.label)}</text>`
+        : t.side === 'L'
         ? `<text x="${x + 10}" y="${p.y + 4}" font-size="12" fill="#222">${esc(t.label)}</text>`
         : `<text x="${x + w - 10}" y="${p.y + 4}" font-size="12" fill="#222" text-anchor="end">${esc(t.label)}</text>`;
       if (S) s += `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#c4c8cf"/>`;

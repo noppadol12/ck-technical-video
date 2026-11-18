@@ -633,8 +633,8 @@ function paste(){
   doc.items.push(...items);doc.wires.push(...wires);sel=new Set([...items.map(i=>i.id),...wires.map(w=>w.id)]);commit();renderProps();render();
 }
 function setPath(o,k,v){o[k]=v;}
-function minDevH(it){const n=Math.max(it.terms.filter(t=>t.side==='L').length,it.terms.filter(t=>t.side==='R').length);return snap((it.tt??60)+Math.max(0,n-1)*(it.ts??30)+30);}
-function autoHeight(it){it.h=Math.max(it.h||0,minDevH(it));}
+function minDevH(it){const n=Math.max(it.terms.filter(t=>t.side==='L').length,it.terms.filter(t=>t.side==='R').length);return snap((it.tt??60)+Math.max(0,n-1)*(it.ts??30)+30+(it.terms.some(t=>t.side==='B')?20:0));}
+function autoHeight(it){it.h=Math.max(it.h||0,minDevH(it));const nb=it.terms.filter(t=>t.side==='B').length;if(nb)it.w=Math.max(it.w||0,snap((nb-1)*(it.ts??30)+60));}
 
 /* ================= Templates ================= */
 function devT(title,L,R,o={}){const it={id:uid(),type:'dev',x:0,y:0,w:o.w||300,h:o.h||0,title,sub:o.sub||'',fs:16,tt:60,ts:30,img:null,
@@ -843,8 +843,8 @@ function renderProps(){
     s=phead('box','กล่องอุปกรณ์',esc(o.title))
       +sec('ข้อมูล',inp('title',o.title,'ชื่อรุ่น / หัวกล่อง')+ta('sub',o.sub,'ข้อความใต้หัว (ถ้ามี)',2))
       +sec('รูปสินค้า',`<div class="g2">${abtn('pickImg','imagePlus',o.img?'เปลี่ยนรูป':'ใส่รูป','outline sm','data-k="img"')}${o.img?abtn('clearImg','x','ลบรูป','outline sm','data-k="img"'):abtn('pasteImg','paste','วางรูป','outline sm')}</div><p class="help" style="margin:8px 0 0">หรือเลือกกล่องนี้ไว้ แล้วกด Ctrl+V</p>`)
-      +sec('ขั้วต่อ (เรียงจากบนลงล่าง)',o.terms.map(t=>`<div class="term"><input type="text" data-term="${t.id}" data-f="label" value="${esc(t.label)}"><select data-term="${t.id}" data-f="side"><option value="L"${t.side==='L'?' selected':''}>ซ้าย</option><option value="R"${t.side==='R'?' selected':''}>ขวา</option></select><button class="btn" data-act="termUp" data-id="${t.id}" title="เลื่อนขึ้น">${ic('up','sm')}</button><button class="btn" data-act="termDown" data-id="${t.id}" title="เลื่อนลง">${ic('down','sm')}</button><button class="btn danger" data-act="termDel" data-id="${t.id}" title="ลบขั้ว">${ic('x','sm')}</button></div>`).join('')
-        +`<div class="g2" style="margin-top:6px">${abtn('termAdd','plus','ขั้วซ้าย','outline sm','data-side="L"')}${abtn('termAdd','plus','ขั้วขวา','outline sm','data-side="R"')}</div>`)
+      +sec('ขั้วต่อ (ซ้าย/ขวา เรียงบน→ล่าง · ล่าง เรียงซ้าย→ขวา)',o.terms.map(t=>`<div class="term"><input type="text" data-term="${t.id}" data-f="label" value="${esc(t.label)}"><select data-term="${t.id}" data-f="side"><option value="L"${t.side==='L'?' selected':''}>ซ้าย</option><option value="R"${t.side==='R'?' selected':''}>ขวา</option><option value="B"${t.side==='B'?' selected':''}>ล่าง</option></select><button class="btn" data-act="termUp" data-id="${t.id}" title="เลื่อนขึ้น">${ic('up','sm')}</button><button class="btn" data-act="termDown" data-id="${t.id}" title="เลื่อนลง">${ic('down','sm')}</button><button class="btn danger" data-act="termDel" data-id="${t.id}" title="ลบขั้ว">${ic('x','sm')}</button></div>`).join('')
+        +`<div class="g3" style="margin-top:6px">${abtn('termAdd','plus','ซ้าย','outline sm','data-side="L"')}${abtn('termAdd','plus','ขวา','outline sm','data-side="R"')}${abtn('termAdd','plus','ล่าง','outline sm','data-side="B"')}</div>`)
       +sec('ขนาด',`<div class="g2">${inp('tt',o.tt??60,'ขั้วแรกห่างขอบบน','number','step="10" min="20"')}${inp('ts',o.ts??30,'ระยะห่างขั้ว','number','step="10" min="10"')}</div><div class="g3">${inp('w',o.w,'กว้าง','number','step="10"')}${inp('h',o.h,'สูง','number','step="10"')}${inp('fs',o.fs||16,'ขนาดหัว','number')}</div>`)
       +sec('คลังอุปกรณ์',abtn('toLib','star','บันทึกลงคลังอุปกรณ์','primary block')+`<p class="help" style="margin:8px 0 0">เก็บกล่องนี้ (รูป + ขั้ว) ไว้ลากมาใช้ซ้ำในงานอื่น</p>`)
       +arrange()+danger();
@@ -895,7 +895,7 @@ props.addEventListener('click',async e=>{
   else if(a==='reroute')o.pts=[];
   else if(a==='rot'){rotateSel();renderProps();return;}
   else if(a==='front'||a==='back'){doc.items=doc.items.filter(i=>i!==o);a==='front'?doc.items.push(o):doc.items.unshift(o);}
-  else if(a==='termAdd'){o.terms.push({id:uid(),side:b.dataset.side,label:'ขั้วใหม่'});autoHeight(o);}
+  else if(a==='termAdd'){o.terms.push({id:uid(),side:b.dataset.side,label:b.dataset.side==='B'?String(o.terms.filter(t=>t.side==='B').length+1):'ขั้วใหม่'});autoHeight(o);}
   else if(a==='termDel'){freeRefsTo(o.id,b.dataset.id);o.terms=o.terms.filter(t=>t.id!==b.dataset.id);}
   else if(a==='termUp'||a==='termDown'){const i=o.terms.findIndex(t=>t.id===b.dataset.id),t=o.terms[i],dir=a==='termUp'?-1:1;
     let j=i+dir;while(j>=0&&j<o.terms.length&&o.terms[j].side!==t.side)j+=dir;if(j<0||j>=o.terms.length)return;[o.terms[i],o.terms[j]]=[o.terms[j],o.terms[i]];}
