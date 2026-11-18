@@ -123,13 +123,76 @@ kbd{justify-self:start;font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospa
 #wirePop{padding:10px;min-width:232px}
 #wirePop .sws{padding:0 4px 10px}
 /* modal */
-#modal{position:fixed;inset:0;background:rgba(16,24,40,.42);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100}
-#modal.open{display:flex}
-#modal .box{background:#fff;border-radius:16px;width:min(760px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);overflow:hidden}
+/* ---- sheet: วัสดุโปร่งแสง + เปิดจากปุ่มที่กด + ย้อนทางเดิมตอนปิด ---- */
+#modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100;background:rgba(16,24,40,.30);-webkit-backdrop-filter:blur(8px) saturate(120%);backdrop-filter:blur(8px) saturate(120%)}
+#modal.open{display:flex;animation:scrimIn .26s ease-out both}
+#modal.closing{animation:scrimOut .2s ease-in both;pointer-events:none}
+#modal .box{background:#fff;border-radius:18px;width:min(760px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 0 0 1px rgba(16,24,40,.06),0 24px 64px rgba(16,24,40,.22);overflow:hidden;transform-origin:var(--ox,50%) var(--oy,30%);animation:sheetIn .42s cubic-bezier(.32,.72,0,1) both}
+#modal.closing .box{animation:sheetOut .2s cubic-bezier(.4,0,1,1) both}
+@keyframes sheetIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@keyframes sheetOut{to{opacity:0;transform:scale(.95)}}
+@keyframes scrimIn{from{background:rgba(16,24,40,0);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0)}}
+@keyframes scrimOut{to{background:rgba(16,24,40,0);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0)}}
 #modal.wide .box{width:min(1280px,96vw)}
 #modal .head{display:flex;align-items:center;gap:8px;padding:16px 18px;border-bottom:1px solid var(--border)}
 #modal .head h2{font-size:16px;font-weight:600;margin:0;flex:1}
 #modal .body{overflow:auto;padding:14px 18px 18px}
+/* งานทั้งหมด */
+#modal.docs .box{width:min(1140px,94vw);height:min(840px,88vh);max-height:none;background:rgba(250,251,253,.88);-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);border:1px solid rgba(255,255,255,.7)}
+#modal.docs .head{border-bottom:0;padding:22px 26px 6px}
+#modal.docs .head h2{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+#modal.docs .body{padding:6px 26px 28px}
+.dtool{position:sticky;top:-6px;z-index:3;display:flex;align-items:center;gap:10px;padding:10px 0 14px;margin-bottom:4px;background:linear-gradient(rgba(250,251,253,.96) 70%,rgba(250,251,253,0))}
+.dsearch{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;flex:0 1 340px;border-radius:10px;background:rgba(16,24,40,.06);color:var(--muted);transition:background .15s,box-shadow .15s}
+.dsearch:focus-within{background:#fff;box-shadow:0 0 0 1px var(--accent),0 0 0 4px var(--accent-soft)}
+.dsearch input[type=text]{border:0;outline:0;box-shadow:none;background:transparent;padding:0;min-height:0;height:100%;font:inherit;font-size:13.5px;color:var(--text);flex:1;min-width:0;border-radius:0}
+.dsearch input[type=text]:focus{box-shadow:none}
+.dseg{flex:none}.dseg button{width:34px;flex:none}
+.dcount{margin-left:auto;font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:22px 18px}
+.dcard{position:relative;display:flex;flex-direction:column;gap:10px;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.dthumb{position:relative;aspect-ratio:1.414;border-radius:12px;background:#fff;overflow:hidden;box-shadow:0 0 0 1px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.05);transition:transform .32s cubic-bezier(.32,.72,0,1),box-shadow .32s cubic-bezier(.32,.72,0,1)}
+.dthumb>svg{position:absolute;inset:7px;width:calc(100% - 14px);height:calc(100% - 14px)}
+.dcard:hover .dthumb{transform:translateY(-3px);box-shadow:0 0 0 1px rgba(16,24,40,.08),0 14px 32px rgba(16,24,40,.14)}
+.dcard:active .dthumb{transform:scale(.975);transition-duration:.1s}
+.dcard:focus-visible .dthumb{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--accent)}
+.dcard.cur .dthumb{box-shadow:0 0 0 2px var(--accent),0 10px 28px rgba(37,99,235,.18)}
+.dpill{position:absolute;left:8px;top:8px;display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.01em;color:var(--text-2);background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(12px) saturate(180%);backdrop-filter:blur(12px) saturate(180%);box-shadow:0 0 0 1px rgba(16,24,40,.08);white-space:nowrap}
+.dpill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.dpill.pub{color:#05603a}.dpill.pub::before{background:#12b76a}
+.dpill.chg{color:#93370d}.dpill.chg::before{background:#f79009}
+.dpill.cur{left:auto;right:8px;top:auto;bottom:8px;color:var(--accent)}.dpill.cur::before{background:var(--accent)}
+.dacts{position:absolute;right:8px;top:8px;display:flex;gap:4px;opacity:0;transform:translateY(-2px);transition:opacity .18s,transform .18s}
+.dcard:hover .dacts,.dcard:focus-within .dacts{opacity:1;transform:none}
+@media (hover:none){.dacts{opacity:1;transform:none}}
+.gbtn{width:30px;height:30px;border-radius:9px;border:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(12px) saturate(180%);backdrop-filter:blur(12px) saturate(180%);box-shadow:0 0 0 1px rgba(16,24,40,.08),0 2px 6px rgba(16,24,40,.08);transition:transform .1s}
+.gbtn:hover{background:#fff}.gbtn:active{transform:scale(.92)}
+.gbtn.danger{color:var(--danger)}
+.dmeta{padding:0 2px;min-width:0}
+.dmeta b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13.5px;font-weight:600;line-height:1.35;letter-spacing:-.005em;color:var(--text)}
+.dmeta small{display:block;margin-top:3px;font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dlist{display:flex;flex-direction:column;gap:6px}
+.dlist .dcard{flex-direction:row;align-items:center;gap:14px;padding:8px;border-radius:14px;transition:background .15s}
+.dlist .dcard:hover{background:rgba(16,24,40,.04)}
+.dlist .dcard.cur{background:var(--accent-soft)}
+.dlist .dthumb{width:112px;flex:none;border-radius:8px}
+.dlist .dthumb>svg{inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}
+.dlist .dcard:hover .dthumb,.dlist .dcard.cur .dthumb{transform:none;box-shadow:0 0 0 1px rgba(16,24,40,.08)}
+.dlist .dmeta{flex:1}
+.dlist .rowside{display:flex;align-items:center;gap:6px;flex:none}
+.dlist .rowside .dpill{position:static;box-shadow:none;background:rgba(16,24,40,.05)}
+.dempty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:70px 20px;text-align:center;color:var(--text-2)}
+.dempty .ic{width:40px;height:40px;stroke-width:1.4;color:var(--muted)}
+.dempty b{font-size:16px;color:var(--text);font-weight:600;letter-spacing:-.01em}
+.skel{aspect-ratio:1.414;border-radius:12px;background:linear-gradient(100deg,rgba(16,24,40,.05) 40%,rgba(16,24,40,.09) 50%,rgba(16,24,40,.05) 60%) 0 0/300% 100%;animation:shimmer 1.4s linear infinite}
+@keyframes shimmer{to{background-position:-150% 0}}
+@media (prefers-reduced-motion:reduce){
+  #modal.open,#modal .box{animation:fadeIn .16s both}#modal.closing,#modal.closing .box{animation:fadeOut .14s both}
+  .dthumb,.dacts{transition:none}.dcard:hover .dthumb{transform:none}.skel{animation:none}
+}
+@keyframes fadeIn{from{opacity:0}}@keyframes fadeOut{to{opacity:0}}
+@media (prefers-reduced-transparency:reduce){#modal,#modal.docs .box,.dpill,.gbtn{-webkit-backdrop-filter:none;backdrop-filter:none}#modal.docs .box{background:#f8f9fb}.dpill,.gbtn{background:#fff}}
+@media (prefers-contrast:more){.dthumb{box-shadow:0 0 0 1px #667085}.dpill,.gbtn{box-shadow:0 0 0 1px #344054}}
 .docrow{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;border:1px solid transparent}
 .docrow:hover{background:var(--sunken)}
 .docrow.cur{background:var(--accent-soft);border-color:#d1e0ff}
@@ -270,6 +333,8 @@ const ICONS={
   cloud:'<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
   eyeOff:'<path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61M2 2l20 20M14.12 14.12a3 3 0 1 1-4.24-4.24"/>',
   link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  grid:'<rect width="7" height="7" x="3" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="14" rx="1.5"/><rect width="7" height="7" x="3" y="14" rx="1.5"/>',
+  list:'<path d="M3 6h.01M3 12h.01M3 18h.01M8 6h13M8 12h13M8 18h13"/>',
   hdd:'<path d="M22 12H2M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11zM6 16h.01M10 16h.01"/>',
 };
 const ic=(n,cls='')=>`<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
@@ -323,7 +388,7 @@ function authLost(){
   $('#mTitle').textContent='เข้าสู่ระบบหลังบ้าน';$('#mTools').innerHTML='';
   $('#mBody').innerHTML=`<div class="note warn">${ic('alert','sm')}<div>ต้องเข้าสู่ระบบหลังบ้านก่อน (หรือหมดเวลาใช้งาน 12 ชั่วโมง)<br>งานที่ยังไม่ได้ส่งขึ้นระบบ เก็บไว้ในเครื่องนี้แล้ว จะส่งขึ้นให้เมื่อกลับมา</div></div>
     <div class="row" style="margin-top:14px"><a class="btn primary" href="/admin/?next=/admin/wiring/">${ic('arrowLeft','sm')}<span>ไปหน้าเข้าสู่ระบบ</span></a></div>`;
-  modal.classList.remove('wide');modal.classList.add('open');
+  sheetOpen();
 }
 
 /* ---------- รูป: id = sha256 ของไฟล์ ---------- */
@@ -783,7 +848,7 @@ function openCrop(src){
   $('#mTitle').textContent='ลากกรอบเลือกส่วนที่ต้องการ';
   $('#mTools').innerHTML=`<button class="btn outline" data-crop="all">${ic('image')}<span>ใช้ทั้งภาพ</span></button><button class="btn primary" data-crop="ok" id="cropOk" disabled>${ic('check')}<span>วางส่วนที่เลือก</span></button>`;
   $('#mBody').innerHTML='<div class="cropwrap"><canvas id="cropCv"></canvas></div>';
-  modal.classList.add('open','wide');
+  sheetOpen('wide');
   const cv=$('#cropCv');cropS=Math.min((Math.min(innerWidth*0.94,1280)-60)/src.width,(innerHeight*0.86-120)/src.height,1);
   cv.width=Math.round(src.width*cropS);cv.height=Math.round(src.height*cropS);
   const g=cv.getContext('2d');let st=null;
@@ -1042,7 +1107,7 @@ async function showPublish(){
   await flushSave();
   if(dirty){toast('ยังส่งงานขึ้นระบบไม่ได้ — ลองใหม่เมื่อออนไลน์','alert');return;}
   $('#mTitle').textContent='เผยแพร่ให้ลูกค้า';$('#mTools').innerHTML='';
-  $('#mBody').innerHTML='<p class="help">กำลังโหลด…</p>';modal.classList.remove('wide');modal.classList.add('open');
+  $('#mBody').innerHTML='<p class="help">กำลังโหลด…</p>';sheetOpen();
   const[c,v]=await Promise.all([API('/api/admin/categories'),API('/api/admin/videos')]);
   const cats=c.ok?c.data.categories:[],pdfs=v.ok?v.data.videos.filter(x=>x.is_document):[];
   const defCat=doc.category_id||(cats.find(x=>/wiring|วงจร|แผนผัง/i.test(x.name))||{}).id||'';
@@ -1071,27 +1136,85 @@ async function doPublish(kind){
   toast(kind==='go'?'เผยแพร่แล้ว — ลูกค้าเห็นในหมวด '+(doc.category||'ทั่วไป'):'หยุดเผยแพร่แล้ว',kind==='go'?'globe':'eyeOff');
 }
 const modal=$('#modal');
-function closeModal(){modal.classList.remove('open','wide');cropSrc=null;}
+let closeT=null;
+// เปิด sheet — ถ้ากำลังปิดอยู่ให้กลับมาเปิดต่อได้ทันที (ไม่ล็อกการกด)
+function sheetOpen(cls,origin){
+  clearTimeout(closeT);
+  const box=modal.querySelector('.box');
+  modal.classList.remove('closing','wide','docs');if(cls)modal.classList.add(cls);modal.classList.add('open');
+  box.style.removeProperty('--ox');box.style.removeProperty('--oy');
+  if(origin){const b=origin.getBoundingClientRect();box.style.setProperty('--ox',(b.left+b.width/2-box.offsetLeft)+'px');box.style.setProperty('--oy',(b.top+b.height/2-box.offsetTop)+'px');}
+}
+// ปิดย้อนทางเดิม (หดกลับเข้าหาปุ่มที่เปิด)
+function closeModal(){
+  if(!modal.classList.contains('open')||modal.classList.contains('closing'))return;
+  cropSrc=null;modal.classList.add('closing');
+  closeT=setTimeout(()=>modal.classList.remove('open','wide','docs','closing'),200);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open')&&!authShown){e.preventDefault();closeModal();}});
 $('#mClose').onclick=closeModal;
 $('#btnPublish').onclick=showPublish;
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 $('#btnDocs').onclick=showDocs;
+let docsCache=[],docsQ='',docsView=lsGet('docsView')||'grid';
+const thumbCache=new Map();
+// ภาพตัวอย่างจากแผนผังจริง (ใช้ตัววาดเดียวกับหน้าลูกค้า)
+function docThumb(d){
+  const live=doc&&d.id===doc.id,data=live?docData(doc):d.data;if(!data)return'';
+  const key=live?null:d.id+':'+d.revision;
+  if(key&&thumbCache.has(key))return thumbCache.get(key);
+  const tmp={page:data.page||'A4L',items:data.items||[],wires:data.wires||[]};
+  let svg='';CKW.bind({doc:()=>tmp,sel:()=>new Set()});
+  try{svg=exportSVG().replace('<svg ','<svg preserveAspectRatio="xMidYMid meet" aria-hidden="true" ');}catch(_){}
+  finally{CKW.bind({doc:()=>doc,sel:()=>sel});}
+  if(key)thumbCache.set(key,svg);return svg;
+}
+function relTime(t){
+  const s=(Date.now()-new Date(t).getTime())/1000;
+  if(s<60)return'เมื่อสักครู่';if(s<3600)return Math.floor(s/60)+' นาทีที่แล้ว';if(s<86400)return Math.floor(s/3600)+' ชม.ที่แล้ว';
+  if(s<172800)return'เมื่อวาน';if(s<604800)return Math.floor(s/86400)+' วันที่แล้ว';
+  return new Date(t).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+}
+const docPill=d=>d.is_published?(d.has_changes?'<span class="dpill chg">มีแก้ไขยังไม่อัปเดต</span>':'<span class="dpill pub">เผยแพร่แล้ว</span>'):'<span class="dpill">ฉบับร่าง</span>';
 async function showDocs(){
   saveNow();
   $('#mTitle').textContent='งานทั้งหมด';
   $('#mTools').innerHTML=`<button class="btn outline sm" data-dm="import" data-tip="ไฟล์ .ckw.json หรือไฟล์สำรองจากโปรแกรมในเครื่อง">${ic('upload','sm')}<span>นำเข้า</span></button><button class="btn primary sm" data-dm="new">${ic('plus','sm')}<span>งานใหม่</span></button>`;
-  $('#mBody').innerHTML='<p class="help">กำลังโหลด…</p>';modal.classList.remove('wide');modal.classList.add('open');
-  const r=await API(API_BASE);
-  if(!r.ok){$('#mBody').innerHTML=`<div class="note warn">${ic('alert','sm')}<div>${r.status===0?'ออฟไลน์ — โหลดรายการงานไม่ได้':r.data.error==='not_ready'?'ยังไม่ได้ติดตั้งฐานข้อมูลแผนผัง (รัน supabase/phase5.sql)':'โหลดรายการงานไม่สำเร็จ'}</div></div>`;return;}
-  const docs=r.data.diagrams||[];
-  $('#mTitle').textContent='งานทั้งหมด ('+docs.length+')';
-  const badge=d=>d.is_published?(d.has_changes?'<span class="badge chg">มีแก้ไขยังไม่อัปเดต</span>':'<span class="badge pub">เผยแพร่แล้ว</span>'):'<span class="badge">ฉบับร่าง</span>';
-  $('#mBody').innerHTML=(docs.map(d=>`<div class="docrow${doc&&d.id===doc.id?' cur':''}"><span class="doc-ic">${ic('fileText')}</span><div class="nm"><b>${esc(d.title)}</b><small>${badge(d)} ${d.category?esc(d.category)+' · ':''}แก้ไขล่าสุด ${new Date(d.updated_at).toLocaleString('th-TH')}</small></div>
-    <div class="acts"><button class="btn sm outline" data-dm="open" data-id="${d.id}">เปิด</button><button class="btn sm icon" data-dm="dup" data-id="${d.id}" data-tip="ทำสำเนา">${ic('copy','sm')}</button><button class="btn sm icon danger" data-dm="del" data-id="${d.id}" data-name="${esc(d.title)}" data-tip="ลบ">${ic('trash','sm')}</button></div></div>`).join('')||'<p class="help">ยังไม่มีงาน กด "งานใหม่" หรือ "นำเข้า" งานจากโปรแกรมในเครื่อง</p>');
+  $('#mBody').innerHTML=`<div class="dtool"><label class="dsearch">${ic('search','sm')}<input type="text" id="docsQ" placeholder="ค้นหาชื่องาน หรือหมวด" value="${esc(docsQ)}" spellcheck="false"></label>
+    <div class="seg dseg" role="group" aria-label="มุมมอง"><button data-dv="grid" title="ตาราง">${ic('grid','sm')}</button><button data-dv="list" title="รายการ">${ic('list','sm')}</button></div><span class="dcount" id="docsCount"></span></div>
+    <div id="docsList" class="dgrid">${'<div><div class="skel"></div></div>'.repeat(8)}</div>`;
+  sheetOpen('docs',$('#btnDocs'));
+  document.querySelectorAll('[data-dv]').forEach(b=>b.classList.toggle('on',b.dataset.dv===docsView));
+  $('#docsQ').addEventListener('input',e=>{docsQ=e.target.value;renderDocsList();});
+  $('#docsList').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('dcard')){e.preventDefault();e.target.click();}});
+  const r=await API(API_BASE+'?with=data');
+  if(!$('#docsList'))return;
+  if(!r.ok){$('#docsList').className='';$('#docsList').innerHTML=`<div class="note warn">${ic('alert','sm')}<div>${r.status===0?'ออฟไลน์ — โหลดรายการงานไม่ได้':r.data.error==='not_ready'?'ยังไม่ได้ติดตั้งฐานข้อมูลแผนผัง (รัน supabase/phase5.sql)':'โหลดรายการงานไม่สำเร็จ'}</div></div>`;return;}
+  docsCache=r.data.diagrams||[];
+  renderDocsList();
+}
+function renderDocsList(){
+  const el=$('#docsList');if(!el)return;
+  const q=docsQ.trim().toLowerCase();
+  const list=docsCache.filter(d=>!q||d.title.toLowerCase().includes(q)||(d.category||'').toLowerCase().includes(q));
+  $('#docsCount').textContent=q?`${list.length} จาก ${docsCache.length} งาน`:`${docsCache.length} งาน · เผยแพร่ ${docsCache.filter(d=>d.is_published).length}`;
+  document.querySelectorAll('[data-dv]').forEach(b=>b.classList.toggle('on',b.dataset.dv===docsView));
+  if(!docsCache.length){el.className='';el.innerHTML=`<div class="dempty">${ic('fileText')}<b>ยังไม่มีงาน</b><div>เริ่มวาดใหม่ หรือนำเข้างานจากโปรแกรมในเครื่อง (.ckw.json)</div><div class="row"><button class="btn outline" data-dm="import">${ic('upload','sm')}<span>นำเข้า</span></button><button class="btn primary" data-dm="new">${ic('plus','sm')}<span>งานใหม่</span></button></div></div>`;return;}
+  if(!list.length){el.className='';el.innerHTML=`<div class="dempty">${ic('search')}<b>ไม่พบงาน</b><div>ไม่มีงานที่ชื่อหรือหมวดตรงกับ "${esc(docsQ.trim())}"</div></div>`;return;}
+  const grid=docsView==='grid';el.className=grid?'dgrid':'dlist';
+  el.innerHTML=list.map(d=>{
+    const cur=doc&&d.id===doc.id;
+    const acts=`<button class="gbtn" data-dm="dup" data-id="${d.id}" title="ทำสำเนา" aria-label="ทำสำเนา">${ic('copy','sm')}</button><button class="gbtn danger" data-dm="del" data-id="${d.id}" data-name="${esc(d.title)}" title="ลบ" aria-label="ลบ">${ic('trash','sm')}</button>`;
+    const meta=`<div class="dmeta"><b title="${esc(d.title)}">${esc(d.title)}</b><small>${d.category?esc(d.category)+' · ':''}แก้ไข ${relTime(d.updated_at)}</small></div>`;
+    return grid
+      ?`<div class="dcard${cur?' cur':''}" data-dm="open" data-id="${d.id}" tabindex="0" role="button" aria-label="เปิด ${esc(d.title)}"><div class="dthumb">${docThumb(d)}${docPill(d)}${cur?'<span class="dpill cur">กำลังเปิดอยู่</span>':''}<div class="dacts">${acts}</div></div>${meta}</div>`
+      :`<div class="dcard${cur?' cur':''}" data-dm="open" data-id="${d.id}" tabindex="0" role="button" aria-label="เปิด ${esc(d.title)}"><div class="dthumb">${docThumb(d)}</div>${meta}<div class="rowside">${cur?'<span class="dpill cur" style="position:static">กำลังเปิดอยู่</span>':''}${docPill(d)}${acts}</div></div>`;
+  }).join('');
 }
 modal.addEventListener('click',async e=>{
   const cb=e.target.closest('[data-crop]');if(cb){finishCrop(cb.dataset.crop==='all');return;}
   const pb=e.target.closest('[data-pub]');if(pb){doPublish(pb.dataset.pub);return;}
+  const dv=e.target.closest('[data-dv]');if(dv){docsView=dv.dataset.dv;lsSet('docsView',docsView);renderDocsList();return;}
   const b=e.target.closest('[data-dm]');if(!b)return;const a=b.dataset.dm,id=b.dataset.id;
   if(a==='new')return newDocument();
   if(a==='import')return $('#fileJson').click();
